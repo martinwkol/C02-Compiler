@@ -1,6 +1,6 @@
-package edu.kit.kastel.vads.compiler.backend.aasm;
+package edu.kit.kastel.vads.compiler.backend.old.aasm;
 
-import edu.kit.kastel.vads.compiler.backend.regalloc.Register;
+import edu.kit.kastel.vads.compiler.backend.old.regalloc.Register;
 
 public record VirtualRegister(int id) implements Register {
     @Override
