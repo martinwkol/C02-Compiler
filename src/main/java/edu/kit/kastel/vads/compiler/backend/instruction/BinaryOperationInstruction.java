@@ -4,14 +4,14 @@ import edu.kit.kastel.vads.compiler.backend.register.Register;
 
 import java.util.List;
 
-public abstract class BinaryOperationInstruction extends Instruction {
-    protected Register left;
-    protected Register right;
+public abstract sealed class BinaryOperationInstruction extends Instruction permits AddInstruction, SubInstruction, MulInstruction {
+    protected Register destination;
+    protected Register source;
 
-    protected BinaryOperationInstruction(Register left, Register right) {
-        super(List.of(left), List.of(left, right));
+    protected BinaryOperationInstruction(Register destination, Register source) {
+        super(List.of(destination), List.of(destination, source));
 
-        this.left = left;
-        this.right = right;
+        this.destination = destination;
+        this.source = source;
     }
 }
