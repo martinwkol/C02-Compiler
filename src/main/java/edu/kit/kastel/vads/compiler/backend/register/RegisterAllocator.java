@@ -12,7 +12,6 @@ public class RegisterAllocator {
     private int nextFreeId;
     private final Map<Node, VirtualRegister> registers = new HashMap<>();
 
-
     public RegisterAllocator() {
         nextFreeId = 0;
     }
