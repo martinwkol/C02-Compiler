@@ -19,6 +19,10 @@ public enum PhysicalRegister implements Register {
     R15("r15b", "r15w", "r15d", "r15"),
     R16("r16b", "r16w", "r16d", "r16");
 
+
+    public static final PhysicalRegister ReturnRegister = A;
+
+
     public final String name1byte;
     public final String name2bytes;
     public final String name4bytes;
