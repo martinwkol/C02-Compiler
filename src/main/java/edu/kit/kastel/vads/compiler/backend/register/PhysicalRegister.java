@@ -20,7 +20,13 @@ public enum PhysicalRegister implements Register {
     R16("r16b", "r16w", "r16d", "r16");
 
 
-    public static final PhysicalRegister ReturnRegister = A;
+    public static final PhysicalRegister Return = A;
+
+    public static final PhysicalRegister DividendMS = D;
+    public static final PhysicalRegister DividendLS = A;
+    public static final PhysicalRegister Quotient = A;
+    public static final PhysicalRegister Remainder = D;
+
 
 
     public final String name1byte;

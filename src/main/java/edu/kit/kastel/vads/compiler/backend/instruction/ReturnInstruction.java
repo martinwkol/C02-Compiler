@@ -6,6 +6,6 @@ import java.util.List;
 
 public class ReturnInstruction extends Instruction {
     public ReturnInstruction() {
-        super(List.of(), List.of(PhysicalRegister.ReturnRegister));
+        super(List.of(), List.of(PhysicalRegister.Return));
     }
 }
