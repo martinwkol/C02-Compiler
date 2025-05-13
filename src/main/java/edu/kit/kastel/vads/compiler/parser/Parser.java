@@ -40,12 +40,19 @@ public class Parser {
     }
 
     public ProgramTree parseProgram() {
-        return new ProgramTree(List.of(parseFunction()));
+        ProgramTree programTree = new ProgramTree(List.of(parseFunction()));
+        if (this.tokenSource.hasMore()) {
+            throw new ParseException("expected end of input but got " + this.tokenSource.peek());
+        }
+        return programTree;
     }
 
     private FunctionTree parseFunction() {
         Keyword returnType = this.tokenSource.expectKeyword(KeywordType.INT);
         Identifier identifier = this.tokenSource.expectIdentifier();
+        if (!identifier.value().equals("main")) {
+            throw new ParseException("expected main function but got " + identifier);
+        }
         this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
         this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
         BlockTree body = parseBlock();
