@@ -1,6 +1,7 @@
 package edu.kit.kastel.vads.compiler.backend;
 
 import edu.kit.kastel.vads.compiler.backend.instruction.*;
+import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
@@ -48,14 +49,23 @@ public class InstructionGenerator {
         VirtualRegister destination = registerAllocator.get(node);
         VirtualRegister left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         VirtualRegister right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
-        move(destination, left);
 
-        switch (node) {
-            case AddNode _ -> addInstruction(new AddInstruction(destination, right));
-            case SubNode _ -> addInstruction(new SubInstruction(destination, right));
-            case MulNode _ -> addInstruction(new MulInstruction(destination, right));
-            case DivNode _ -> addInstruction(new AddInstruction(destination, right));
-            case ModNode _ -> addInstruction(new AddInstruction(destination, right));
+        if (!(node instanceof DivNode || node instanceof ModNode)) {
+            move(destination, left);
+            switch (node) {
+                case AddNode _ -> addInstruction(new AddInstruction(destination, right));
+                case SubNode _ -> addInstruction(new SubInstruction(destination, right));
+                case MulNode _ -> addInstruction(new MulInstruction(destination, right));
+                default -> throw new IllegalStateException("DivNode and ModNode should not be handled here");
+            }
+        } else {
+            move(PhysicalRegister.DividendLS, left);
+            addInstruction(new DivInstruction(right));
+            if (node instanceof DivNode) {
+                move(destination, PhysicalRegister.Quotient);
+            } else {
+                move(destination, PhysicalRegister.Remainder);
+            }
         }
     }
 
