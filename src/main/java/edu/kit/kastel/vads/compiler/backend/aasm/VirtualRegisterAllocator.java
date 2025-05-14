@@ -2,28 +2,35 @@ package edu.kit.kastel.vads.compiler.backend.aasm;
 
 import edu.kit.kastel.vads.compiler.backend.regalloc.Register;
 import edu.kit.kastel.vads.compiler.backend.regalloc.RegisterAllocator;
-import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.node.Block;
 import edu.kit.kastel.vads.compiler.ir.node.Node;
 import edu.kit.kastel.vads.compiler.ir.node.ProjNode;
 import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
 import edu.kit.kastel.vads.compiler.ir.node.StartNode;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class AasmRegisterAllocator implements RegisterAllocator {
+public class VirtualRegisterAllocator implements RegisterAllocator {
     private int id;
-    private final Map<Node, Register> registers = new HashMap<>();
+    private final Map<Node, VirtualRegister> registers = new HashMap<>();
 
-    @Override
-    public Map<Node, Register> allocateRegisters(IrGraph graph) {
-        Set<Node> visited = new HashSet<>();
-        visited.add(graph.endBlock());
-        scan(graph.endBlock(), visited);
-        return Map.copyOf(this.registers);
+    @Override @Nullable
+    public Register allocateRegister(Node node) {
+        if (!needsRegister(node)) return null;
+
+        VirtualRegister register = new VirtualRegister(this.id);
+        VirtualRegister oldRegister = registers.put(node, register);
+
+        if (oldRegister != null) return oldRegister;
+        this.id++;
+        return register;
+    }
+
+    public VirtualRegister get(Node node) {
+        return registers.get(node);
     }
 
     private void scan(Node node, Set<Node> visited) {

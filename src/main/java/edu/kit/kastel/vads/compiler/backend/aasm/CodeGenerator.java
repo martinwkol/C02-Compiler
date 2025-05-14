@@ -28,7 +28,7 @@ public class CodeGenerator {
     public String generateCode(List<IrGraph> program) {
         StringBuilder builder = new StringBuilder();
         for (IrGraph graph : program) {
-            AasmRegisterAllocator allocator = new AasmRegisterAllocator();
+            VirtualRegisterAllocator allocator = new VirtualRegisterAllocator();
             Map<Node, Register> registers = allocator.allocateRegisters(graph);
             builder.append("function ")
                 .append(graph.name())
