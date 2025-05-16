@@ -29,7 +29,13 @@ public enum PhysicalRegister implements Register {
     public static final PhysicalRegister Quotient = A;
     public static final PhysicalRegister Remainder = D;
 
-
+    public static final PhysicalRegister[] All = {
+            A, B, C, D, SI, DI, BP, SP, R8, R9, R10, R11, R12, R13, R14, R15, R16
+    };
+    public static final PhysicalRegister[] FreelyUsable = {
+            A, B, C, D, SI, DI, R8, R9, R10
+    };
+    public static final PhysicalRegister Temp = R11;
 
     public final String name1byte;
     public final String name2bytes;
