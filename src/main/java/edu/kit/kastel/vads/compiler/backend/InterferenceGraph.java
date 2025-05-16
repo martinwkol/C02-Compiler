@@ -5,6 +5,7 @@ import edu.kit.kastel.vads.compiler.backend.aasm.VirtualRegister;
 import edu.kit.kastel.vads.compiler.backend.regalloc.Register;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class InterferenceGraph {
@@ -20,6 +21,15 @@ public class InterferenceGraph {
         }
         if (register1 instanceof VirtualRegister virtualRegister2) {
             virtualRegisters.add(virtualRegister2);
+        }
+    }
+
+    public Map<Register, Register> computeRegisterAssignment() {
+        Map<Register, Register> assignment = Arrays.stream(PhysicalRegister.All)
+                .collect(Collectors.toMap(r -> r, r -> r));
+        List<VirtualRegister> ordering = maxCardinalitySearch();
+        for (VirtualRegister register : ordering) {
+            assignment.put(register, minFreeRegister(register, assignment));
         }
     }
 
@@ -52,6 +62,24 @@ public class InterferenceGraph {
         }
 
         return ordering;
+    }
+
+    private Register minFreeRegister(Register register, Map<Register, Register> assignment) {
+        Set<Register> neighbours = edges.get(register);
+        Set<Register> occupied = assignment.keySet().stream()
+                .filter(neighbours::contains).collect(Collectors.toSet());
+        for (PhysicalRegister physicalRegister : PhysicalRegister.FreelyUsable) {
+            if (!occupied.contains(physicalRegister)) {
+                return physicalRegister;
+            }
+        }
+        int id = 0;
+        while (true) {
+            VirtualRegister virtualRegister = new VirtualRegister(id++);
+            if (!occupied.contains(virtualRegister)) {
+                return virtualRegister;
+            }
+        }
     }
 }
 
