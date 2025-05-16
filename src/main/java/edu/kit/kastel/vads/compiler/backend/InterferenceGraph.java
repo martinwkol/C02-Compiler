@@ -31,6 +31,7 @@ public class InterferenceGraph {
         for (VirtualRegister register : ordering) {
             assignment.put(register, minFreeRegister(register, assignment));
         }
+        return assignment;
     }
 
     private List<VirtualRegister> maxCardinalitySearch() {
