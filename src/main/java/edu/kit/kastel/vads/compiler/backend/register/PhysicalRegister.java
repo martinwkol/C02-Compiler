@@ -46,4 +46,10 @@ public enum PhysicalRegister implements Register {
         this.name4bytes = name4bytes;
         this.name8bytes = name8bytes;
     }
+
+    @Override
+    public String registerName() {
+        return "%" + name4bytes;
+    }
+
 }

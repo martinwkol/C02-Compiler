@@ -3,6 +3,7 @@ package edu.kit.kastel.vads.compiler.backend;
 import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
+import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
 import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
@@ -12,11 +13,11 @@ import java.util.Set;
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
 public class Instruction {
-    private Node node;
-    private Set<Register> live = new HashSet<>();
-    private Set<Register> defines = new HashSet<>();
-    private Set<Register> uses = new HashSet<>();
-    private Set<Instruction> successors = new HashSet<>();
+    private final Node node;
+    private final Set<Register> live = new HashSet<>();
+    private final Set<Register> defines = new HashSet<>();
+    private final Set<Register> uses = new HashSet<>();
+    private final Set<Instruction> successors = new HashSet<>();
     private boolean hasImmediateSuccessor;
 
     public Instruction(Node node, RegisterAllocator registerAllocator) {
@@ -25,7 +26,7 @@ public class Instruction {
 
         switch (node) {
             case BinaryOperationNode bNode -> {
-                binary(bNode, registerAllocator);
+                initBinary(bNode, registerAllocator);
                 if (bNode instanceof DivNode || bNode instanceof ModNode) {
                     definesDivRegisters();
                 }
@@ -40,7 +41,11 @@ public class Instruction {
         }
     }
 
-    private void binary(BinaryOperationNode bNode, RegisterAllocator registerAllocator) {
+    public Node getNode() {
+        return node;
+    }
+
+    private void initBinary(BinaryOperationNode bNode, RegisterAllocator registerAllocator) {
         Register destination = registerAllocator.get(bNode);
         Register left = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.RIGHT));

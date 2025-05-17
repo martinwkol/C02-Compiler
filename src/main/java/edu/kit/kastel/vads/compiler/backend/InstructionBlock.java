@@ -10,13 +10,17 @@ import java.util.List;
 import java.util.Set;
 
 public class InstructionBlock {
-    private List<Instruction> instructions = new ArrayList<>();
-    private VirtualRegisterAllocator registerAllocator = new VirtualRegisterAllocator();
+    private final List<Instruction> instructions = new ArrayList<>();
+    private final VirtualRegisterAllocator registerAllocator = new VirtualRegisterAllocator();
 
     public InstructionBlock(IrGraph graph) {
         Set<Node> visited = new HashSet<>();
         visited.add(graph.endBlock());
         scan(graph.endBlock(), visited);
+    }
+
+    public List<Instruction> getInstructions() {
+        return instructions;
     }
 
     private void scan(Node node, Set<Node> visited) {
