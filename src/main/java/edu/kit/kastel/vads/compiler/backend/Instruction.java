@@ -4,6 +4,7 @@ import edu.kit.kastel.vads.compiler.backend.aasm.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.aasm.VirtualRegister;
 import edu.kit.kastel.vads.compiler.backend.aasm.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.regalloc.Register;
+import edu.kit.kastel.vads.compiler.backend.regalloc.RegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
@@ -20,7 +21,7 @@ public class Instruction {
     private Set<Instruction> successors = new HashSet<>();
     private boolean hasImmediateSuccessor;
 
-    public Instruction(Node node, VirtualRegisterAllocator registerAllocator) {
+    public Instruction(Node node, RegisterAllocator registerAllocator) {
         this.node = node;
         hasImmediateSuccessor = true;
 
@@ -41,10 +42,10 @@ public class Instruction {
         }
     }
 
-    private void binary(BinaryOperationNode bNode, VirtualRegisterAllocator registerAllocator) {
-        VirtualRegister destination = registerAllocator.get(bNode);
-        VirtualRegister left = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.LEFT));
-        VirtualRegister right = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.RIGHT));
+    private void binary(BinaryOperationNode bNode, RegisterAllocator registerAllocator) {
+        Register destination = registerAllocator.get(bNode);
+        Register left = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.LEFT));
+        Register right = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.RIGHT));
         defines.add(destination);
         uses.add(left);
         uses.add(right);

@@ -10,4 +10,5 @@ public interface RegisterAllocator {
 
     @Nullable
     Register allocateRegister(Node node);
+    Register get(Node node);
 }
