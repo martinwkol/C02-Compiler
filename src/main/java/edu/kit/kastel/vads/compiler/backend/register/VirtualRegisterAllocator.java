@@ -15,7 +15,7 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
     private int id;
     private final Map<Node, VirtualRegister> registers = new HashMap<>();
 
-    @Override @Nullable
+    @Nullable
     public Register allocateRegister(Node node) {
         if (!needsRegister(node)) return null;
 
@@ -30,6 +30,11 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
     @Override
     public VirtualRegister get(Node node) {
         return registers.get(node);
+    }
+
+    @Override
+    public Set<Node> nodes() {
+        return registers.keySet();
     }
 
     private void scan(Node node, Set<Node> visited) {
