@@ -27,7 +27,7 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
         return register;
     }
 
-    @Override
+    @Override @Nullable
     public VirtualRegister get(Node node) {
         return registers.get(node);
     }

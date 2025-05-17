@@ -31,8 +31,8 @@ public class Instruction {
                 }
             }
             case ReturnNode r -> {
-                defines.add(PhysicalRegister.Return);
-                uses.add(registerAllocator.get(predecessorSkipProj(r, ReturnNode.RESULT)));
+                addDefines(PhysicalRegister.Return);
+                addUses(registerAllocator.get(predecessorSkipProj(r, ReturnNode.RESULT)));
                 hasImmediateSuccessor = false;
             }
             case Phi _ -> throw new UnsupportedOperationException("phi");
@@ -44,16 +44,25 @@ public class Instruction {
         Register destination = registerAllocator.get(bNode);
         Register left = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.RIGHT));
-        defines.add(destination);
-        uses.add(left);
-        uses.add(right);
+        addDefines(destination);
+        addUses(left);
+        addUses(right);
     }
 
     private void definesDivRegisters() {
-        defines.add(PhysicalRegister.DividendLS);
-        defines.add(PhysicalRegister.DividendMS);
-        defines.add(PhysicalRegister.Quotient);
-        defines.add(PhysicalRegister.Remainder);
+        addDefines(PhysicalRegister.DividendLS);
+        addDefines(PhysicalRegister.DividendMS);
+        addDefines(PhysicalRegister.Quotient);
+        addDefines(PhysicalRegister.Remainder);
+    }
+
+    private void addDefines(@Nullable Register register) {
+        if (register == null) throw new IllegalArgumentException("Attempted to define null register");
+        defines.add(register);
+    }
+
+    private void addUses(@Nullable Register register) {
+        if (register != null) uses.add(register);
     }
 
     public void addNonImmediateSuccessor(Instruction successor) {
