@@ -1,6 +1,4 @@
-package edu.kit.kastel.vads.compiler.backend.aasm;
-
-import edu.kit.kastel.vads.compiler.backend.regalloc.Register;
+package edu.kit.kastel.vads.compiler.backend.register;
 
 public enum PhysicalRegister implements Register {
     A("al", "ax", "eax", "rax"),

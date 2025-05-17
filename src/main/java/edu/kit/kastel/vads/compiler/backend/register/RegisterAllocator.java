@@ -1,10 +1,7 @@
-package edu.kit.kastel.vads.compiler.backend.regalloc;
+package edu.kit.kastel.vads.compiler.backend.register;
 
-import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.node.Node;
 import org.jspecify.annotations.Nullable;
-
-import java.util.Map;
 
 public interface RegisterAllocator {
 

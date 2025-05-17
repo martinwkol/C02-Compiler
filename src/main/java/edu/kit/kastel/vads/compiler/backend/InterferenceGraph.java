@@ -1,11 +1,10 @@
 package edu.kit.kastel.vads.compiler.backend;
 
-import edu.kit.kastel.vads.compiler.backend.aasm.PhysicalRegister;
-import edu.kit.kastel.vads.compiler.backend.aasm.VirtualRegister;
-import edu.kit.kastel.vads.compiler.backend.regalloc.Register;
+import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
+import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
+import edu.kit.kastel.vads.compiler.backend.register.Register;
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class InterferenceGraph {
