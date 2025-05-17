@@ -87,4 +87,17 @@ public class Instruction {
         }
         return changes;
     }
+
+    public void addEdges(InterferenceGraph interferenceGraph, @Nullable Instruction next) {
+        if (next != null && hasImmediateSuccessor) addEdgesForSuccessor(interferenceGraph, next);
+        for (Instruction successor : successors) addEdgesForSuccessor(interferenceGraph, successor);
+    }
+
+    private void addEdgesForSuccessor(InterferenceGraph interferenceGraph, Instruction successor) {
+        for (Register defined : defines) {
+            for (Register used : successor.uses) {
+                interferenceGraph.addEdge(defined, used);
+            }
+        }
+    }
 }

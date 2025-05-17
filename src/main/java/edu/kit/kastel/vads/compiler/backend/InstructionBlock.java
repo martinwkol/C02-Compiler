@@ -48,4 +48,15 @@ public class InstructionBlock {
             }
         }
     }
+
+    public InterferenceGraph buildInterferenceGraph() {
+        InterferenceGraph interferenceGraph = new InterferenceGraph();
+        Instruction next = null;
+        for (int i = instructions.size() - 1; i >= 0; --i) {
+            Instruction instruction = instructions.get(i);
+            instruction.addEdges(interferenceGraph, next);
+            next = instruction;
+        }
+        return interferenceGraph;
+    }
 }

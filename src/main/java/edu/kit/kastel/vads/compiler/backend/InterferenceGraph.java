@@ -9,8 +9,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class InterferenceGraph {
-    private Set<VirtualRegister> virtualRegisters;
-    private Map<Register, Set<Register>> edges;
+    private Set<VirtualRegister> virtualRegisters = new HashSet<>();
+    private Map<Register, Set<Register>> edges = new HashMap<>();
 
     public void addEdge(Register register1, Register register2) {
         if (register1 instanceof PhysicalRegister && register2 instanceof PhysicalRegister) return;
