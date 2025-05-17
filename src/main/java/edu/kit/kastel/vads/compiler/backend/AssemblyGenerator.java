@@ -17,6 +17,7 @@ public class AssemblyGenerator {
     public AssemblyGenerator(InstructionBlock block, RegisterAllocator registerAllocator) {
         this.registerAllocator = registerAllocator;
         storedInTemp = null;
+        addStarterCode();
         for (Instruction instruction : block.getInstructions()) {
             generateForInstruction(instruction);
         }
@@ -24,6 +25,20 @@ public class AssemblyGenerator {
 
     public String getAssembly() {
         return builder.toString();
+    }
+
+    private void addStarterCode() {
+        builder.append(".global main\n" +
+                ".global _main\n" +
+                ".text\n" +
+                "main:\n" +
+                "call _main\n" +
+                "; move the return value into the first argument for the syscall\n" +
+                "movq %rax, %rdi\n" +
+                "; move the exit syscall number into rax\n" +
+                "movq $0x3C, %rax\n" +
+                "syscall\n" +
+                "_main:");
     }
 
     private void generateForInstruction(Instruction instruction) {
