@@ -52,4 +52,9 @@ public enum PhysicalRegister implements Register {
         return "%" + name4bytes;
     }
 
+    @Override
+    public String toString() {
+        return "%" + name4bytes;
+    }
+
 }

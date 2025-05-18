@@ -71,8 +71,10 @@ public class InterferenceGraph {
 
     private Register minFreeRegister(Register register, Map<Register, Register> assignment) {
         Set<Register> neighbours = edges.get(register);
-        Set<Register> occupied = assignment.keySet().stream()
-                .filter(neighbours::contains).collect(Collectors.toSet());
+        Set<Register> occupied = assignment.entrySet().stream()
+                .filter(entry -> neighbours.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toSet());
         for (PhysicalRegister physicalRegister : PhysicalRegister.FreelyUsable) {
             if (!occupied.contains(physicalRegister)) {
                 return physicalRegister;

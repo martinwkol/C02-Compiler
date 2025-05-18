@@ -57,6 +57,7 @@ public class Main {
         VirtualRegisterAllocator virtualRegisterAllocator = new VirtualRegisterAllocator();
         InstructionBlock instructionBlock = new InstructionBlock(graphs.getFirst(), virtualRegisterAllocator);
         instructionBlock.deduceLiveness();
+
         InterferenceGraph interferenceGraph = instructionBlock.buildInterferenceGraph();
         ImprovedRegisterAllocator registerAllocator = new ImprovedRegisterAllocator(
                 virtualRegisterAllocator, interferenceGraph.computeRegisterAssignment()

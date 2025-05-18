@@ -36,8 +36,9 @@ public class Instruction {
                 addUses(registerAllocator.get(predecessorSkipProj(r, ReturnNode.RESULT)));
                 hasImmediateSuccessor = false;
             }
+            case ConstIntNode c -> addDefines(registerAllocator.get(c));
             case Phi _ -> throw new UnsupportedOperationException("phi");
-            case ConstIntNode _, Block _, ProjNode _, StartNode _ -> {}
+            case Block _, ProjNode _, StartNode _ -> {}
         }
     }
 
@@ -108,8 +109,10 @@ public class Instruction {
 
     private void addEdgesForSuccessor(InterferenceGraph interferenceGraph, Instruction successor) {
         for (Register defined : defines) {
-            for (Register used : successor.uses) {
-                interferenceGraph.addEdge(defined, used);
+            for (Register liveSuccessor : successor.live) {
+                if (!defined.equals(liveSuccessor)) {
+                    interferenceGraph.addEdge(defined, liveSuccessor);
+                }
             }
         }
     }

@@ -33,19 +33,17 @@ public class AssemblyGenerator {
                 ".text\n" +
                 "main:\n" +
                 "call _main\n" +
-                "; move the return value into the first argument for the syscall\n" +
                 "movq %rax, %rdi\n" +
-                "; move the exit syscall number into rax\n" +
                 "movq $0x3C, %rax\n" +
                 "syscall\n" +
-                "_main:");
+                "_main:\n");
     }
 
     private void generateForInstruction(Instruction instruction) {
         switch (instruction.getNode()) {
             case AddNode add -> binary(add, "addl");
             case SubNode sub -> binary(sub, "subl");
-            case MulNode mul -> binary(mul, "subl");
+            case MulNode mul -> binary(mul, "imull");
             case DivNode div -> divMod(div);
             case ModNode mod -> divMod(mod);
             case ReturnNode r -> returnInstruction(r);
@@ -66,8 +64,8 @@ public class AssemblyGenerator {
                 String.format(
                         "%s %s, %s\n",
                         assemblyInstructionName,
-                        physical(destination).registerName(),
-                        right.registerName()
+                        right.registerName(),
+                        physical(destination).registerName()
                 )
         );
         moveToStackIfVirtual(destination);
@@ -98,7 +96,7 @@ public class AssemblyGenerator {
     private void constInt(ConstIntNode constIntNode) {
         Register destination = registerAllocator.get(constIntNode);
         assignTempIfVirtual(destination);
-        builder.append(String.format("movl $%d, %s", constIntNode.value(), physical(destination).registerName()));
+        builder.append(String.format("movl $%d, %s\n", constIntNode.value(), physical(destination).registerName()));
         moveToStackIfVirtual(destination);
     }
 
@@ -136,6 +134,7 @@ public class AssemblyGenerator {
     private void move(Register from, Register to) {
         if (!(from instanceof PhysicalRegister) && !(to instanceof PhysicalRegister))
             throw new IllegalArgumentException("At least on register must be physical");
+        if (from.equals(to)) return;
         builder.append(
             String.format(
                 "movl %s, %s\n",
