@@ -12,7 +12,7 @@ public class OptimizedRegisterAllocator implements RegisterAllocator {
     private int nextFreeVRId;
 
     public OptimizedRegisterAllocator(RegisterAllocator registerAllocator, Map<Register, Register> registerMap) {
-        int maxVRId = 0;
+        int maxVRId = -1;
         for (Node node : registerAllocator.nodes()) {
             Register mappedRegister = registerMap.get(registerAllocator.getNullable(node));
             if (mappedRegister == null) throw new IllegalArgumentException("registerMap misses needed register");
