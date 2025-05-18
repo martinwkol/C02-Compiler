@@ -44,6 +44,11 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
         return registers.keySet();
     }
 
+    @Override
+    public int requiredStackSize() {
+        return this.id * 8;
+    }
+
     private void scan(Node node, Set<Node> visited) {
         for (Node predecessor : node.predecessors()) {
             if (visited.add(predecessor)) {

@@ -19,6 +19,8 @@ public class AssemblyGenerator {
         this.registerAllocator = registerAllocator;
         storedInTemp = null;
         addStarterCode();
+        if (registerAllocator.requiredStackSize() > 0)
+            builder.append(String.format("subq $%d, %%rsp\n", registerAllocator.requiredStackSize()));
         for (Instruction instruction : block.getInstructions()) {
             generateForInstruction(instruction);
         }
@@ -108,6 +110,8 @@ public class AssemblyGenerator {
     private void returnInstruction(ReturnNode returnNode) {
         Register returnRegister = registerAllocator.get(predecessorSkipProj(returnNode, ReturnNode.RESULT));
         if (returnRegister != PhysicalRegister.Return) move(returnRegister, PhysicalRegister.Return);
+        if (registerAllocator.requiredStackSize() > 0)
+            builder.append(String.format("addq $%d, %%rsp\n", registerAllocator.requiredStackSize()));
         builder.append("ret\n");
     }
 

@@ -9,5 +9,8 @@ public interface RegisterAllocator {
     Register get(Node node);
     @Nullable
     Register getNullable(Node node);
+
     Set<Node> nodes();
+
+    int requiredStackSize();
 }
