@@ -24,13 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         if (args.length != 2) {
             System.err.println("Invalid arguments: Expected one input file and one output file");
             System.exit(3);
         }
         Path input = Path.of(args[0]);
         Path output = Path.of(args[1]);
+        Path assembly = Path.of(args[1] + ".s");
         ProgramTree program = lexAndParse(input);
         try {
             new SemanticAnalysis(program).analyze();
@@ -54,19 +55,25 @@ public class Main {
         }
 
         // TODO: generate assembly and invoke gcc instead of generating abstract assembly
-        VirtualRegisterAllocator virtualRegisterAllocator = new VirtualRegisterAllocator();
-        InstructionBlock instructionBlock = new InstructionBlock(graphs.getFirst(), virtualRegisterAllocator);
-        instructionBlock.deduceLiveness();
+        VirtualRegisterAllocator virtualRA = new VirtualRegisterAllocator();
+        InstructionBlock ib = new InstructionBlock(graphs.getFirst(), virtualRA);
+        ib.deduceLiveness();
 
-        InterferenceGraph interferenceGraph = instructionBlock.buildInterferenceGraph();
-        ImprovedRegisterAllocator registerAllocator = new ImprovedRegisterAllocator(
-                virtualRegisterAllocator, interferenceGraph.computeRegisterAssignment()
+        InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
+        ImprovedRegisterAllocator optimizedRA = new ImprovedRegisterAllocator(
+                virtualRA, interferenceGraph.computeRegisterAssignment()
         );
-        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(instructionBlock, registerAllocator);
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, optimizedRA);
 
 
-        //String s = new CodeGenerator().generateCode(graphs);
-        Files.writeString(output, assemblyGenerator.getAssembly());
+        // Write assembly file
+        Files.writeString(assembly, assemblyGenerator.getAssembly());
+
+        // Compile assembly
+        ProcessBuilder pb = new ProcessBuilder("gcc", assembly.toString(), "-o", output.toString());
+        Process process = pb.start();
+        int exitCode = process.waitFor();
+        System.exit(exitCode);
     }
 
     private static ProgramTree lexAndParse(Path input) throws IOException {
