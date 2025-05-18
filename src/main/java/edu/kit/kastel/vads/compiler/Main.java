@@ -3,7 +3,7 @@ package edu.kit.kastel.vads.compiler;
 import edu.kit.kastel.vads.compiler.backend.AssemblyGenerator;
 import edu.kit.kastel.vads.compiler.backend.InstructionBlock;
 import edu.kit.kastel.vads.compiler.backend.InterferenceGraph;
-import edu.kit.kastel.vads.compiler.backend.register.ImprovedRegisterAllocator;
+import edu.kit.kastel.vads.compiler.backend.register.OptimizedRegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.SsaTranslation;
@@ -60,7 +60,7 @@ public class Main {
         ib.deduceLiveness();
 
         InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
-        ImprovedRegisterAllocator optimizedRA = new ImprovedRegisterAllocator(
+        OptimizedRegisterAllocator optimizedRA = new OptimizedRegisterAllocator(
                 virtualRA, interferenceGraph.computeRegisterAssignment()
         );
         AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, optimizedRA);

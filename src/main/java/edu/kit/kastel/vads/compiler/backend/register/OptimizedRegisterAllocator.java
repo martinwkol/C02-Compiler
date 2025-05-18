@@ -7,22 +7,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class ImprovedRegisterAllocator implements RegisterAllocator {
+public class OptimizedRegisterAllocator implements RegisterAllocator {
     private final Map<Node, Register> registers = new HashMap<>();
-    private int maxVirtualRegisterId;
+    private int nextFreeVRId;
 
-    public ImprovedRegisterAllocator(RegisterAllocator registerAllocator, Map<Register, Register> registerMap) {
-        maxVirtualRegisterId = 0;
+    public OptimizedRegisterAllocator(RegisterAllocator registerAllocator, Map<Register, Register> registerMap) {
+        int maxVRId = 0;
         for (Node node : registerAllocator.nodes()) {
             Register mappedRegister = registerMap.get(registerAllocator.getNullable(node));
             if (mappedRegister == null) throw new IllegalArgumentException("registerMap misses needed register");
             if (mappedRegister instanceof VirtualRegister(int id)) {
-                if (id > maxVirtualRegisterId) {
-                    maxVirtualRegisterId = id;
+                if (id > maxVRId) {
+                    maxVRId = id;
                 }
             }
             registers.put(node, mappedRegister);
         }
+        nextFreeVRId = maxVRId + 1;
     }
 
     @Override
@@ -44,6 +45,6 @@ public class ImprovedRegisterAllocator implements RegisterAllocator {
 
     @Override
     public int requiredStackSize() {
-        return maxVirtualRegisterId * 8;
+        return nextFreeVRId * 8;
     }
 }
