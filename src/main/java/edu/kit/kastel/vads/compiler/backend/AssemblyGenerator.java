@@ -8,6 +8,7 @@ import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
+import static java.util.Collections.swap;
 
 public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();
@@ -59,7 +60,7 @@ public class AssemblyGenerator {
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
 
         assignTempIfVirtual(destination);
-        move(physical(destination), left);
+        move(left, physical(destination));
         builder.append(
                 String.format(
                         "%s %s, %s\n",
