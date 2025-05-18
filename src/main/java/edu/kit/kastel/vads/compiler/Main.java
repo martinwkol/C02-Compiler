@@ -1,6 +1,10 @@
 package edu.kit.kastel.vads.compiler;
 
-import edu.kit.kastel.vads.compiler.backend.aasm.CodeGenerator;
+import edu.kit.kastel.vads.compiler.backend.AssemblyGenerator;
+import edu.kit.kastel.vads.compiler.backend.InstructionBlock;
+import edu.kit.kastel.vads.compiler.backend.InterferenceGraph;
+import edu.kit.kastel.vads.compiler.backend.register.ImprovedRegisterAllocator;
+import edu.kit.kastel.vads.compiler.backend.register.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.SsaTranslation;
 import edu.kit.kastel.vads.compiler.ir.optimize.LocalValueNumbering;
@@ -50,8 +54,18 @@ public class Main {
         }
 
         // TODO: generate assembly and invoke gcc instead of generating abstract assembly
-        String s = new CodeGenerator().generateCode(graphs);
-        Files.writeString(output, s);
+        VirtualRegisterAllocator virtualRegisterAllocator = new VirtualRegisterAllocator();
+        InstructionBlock instructionBlock = new InstructionBlock(graphs.getFirst(), virtualRegisterAllocator);
+        instructionBlock.deduceLiveness();
+        InterferenceGraph interferenceGraph = instructionBlock.buildInterferenceGraph();
+        ImprovedRegisterAllocator registerAllocator = new ImprovedRegisterAllocator(
+                virtualRegisterAllocator, interferenceGraph.computeRegisterAssignment()
+        );
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(instructionBlock, registerAllocator);
+
+
+        //String s = new CodeGenerator().generateCode(graphs);
+        Files.writeString(output, assemblyGenerator.getAssembly());
     }
 
     private static ProgramTree lexAndParse(Path input) throws IOException {

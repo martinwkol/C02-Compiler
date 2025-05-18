@@ -12,14 +12,21 @@ public class ImprovedRegisterAllocator implements RegisterAllocator {
 
     public ImprovedRegisterAllocator(RegisterAllocator registerAllocator, Map<Register, Register> registerMap) {
         for (Node node : registerAllocator.nodes()) {
-            Register mappedRegister = registerMap.get(registerAllocator.get(node));
+            Register mappedRegister = registerMap.get(registerAllocator.getNullable(node));
             if (mappedRegister == null) throw new IllegalArgumentException("registerMap misses needed register");
             registers.put(node, mappedRegister);
         }
     }
 
-    @Override @Nullable
+    @Override
     public Register get(Node node) {
+        Register register = registers.get(node);
+        if (register == null) throw new NullPointerException("Node not assigned a register");
+        return register;
+    }
+
+    @Override @Nullable
+    public Register getNullable(Node node) {
         return registers.get(node);
     }
 

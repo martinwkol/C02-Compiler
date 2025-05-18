@@ -59,7 +59,6 @@ public class AssemblyGenerator {
         Register destination = registerAllocator.get(node);
         Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
-        if (destination == null || left == null || right == null) throw new IllegalStateException("Unallocated registers");
 
         assignTempIfVirtual(destination);
         move(physical(destination), left);
@@ -78,7 +77,6 @@ public class AssemblyGenerator {
         Register destination = registerAllocator.get(node);
         Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
-        if (destination == null || left == null || right == null) throw new IllegalStateException("Unallocated registers");
 
         if (left != PhysicalRegister.DividendLS) move(left, PhysicalRegister.DividendLS);
         builder.append("cltd\n");
@@ -92,15 +90,13 @@ public class AssemblyGenerator {
     }
 
     private void returnInstruction(ReturnNode returnNode) {
-        Register returnRegister = registerAllocator.get(returnNode);
-        if (returnRegister == null) throw new IllegalStateException("Unallocated register");
+        Register returnRegister = registerAllocator.get(predecessorSkipProj(returnNode, ReturnNode.RESULT));
         if (returnRegister != PhysicalRegister.Return) move(returnRegister, PhysicalRegister.Return);
         builder.append("ret\n");
     }
 
     private void constInt(ConstIntNode constIntNode) {
         Register destination = registerAllocator.get(constIntNode);
-        if (destination == null) throw new IllegalStateException("Unallocated register");
         assignTempIfVirtual(destination);
         builder.append(String.format("movl $%d, %s", constIntNode.value(), physical(destination).registerName()));
         moveToStackIfVirtual(destination);

@@ -11,6 +11,11 @@ public class InterferenceGraph {
     private Set<VirtualRegister> virtualRegisters = new HashSet<>();
     private Map<Register, Set<Register>> edges = new HashMap<>();
 
+    public void addRegister(VirtualRegister register) {
+        virtualRegisters.add(register);
+        edges.computeIfAbsent(register, _ -> new HashSet<>());
+    }
+
     public void addEdge(Register register1, Register register2) {
         if (register1 instanceof PhysicalRegister && register2 instanceof PhysicalRegister) return;
         edges.computeIfAbsent(register1, _ -> new HashSet<>()).add(register2);

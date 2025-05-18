@@ -27,8 +27,15 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
         return register;
     }
 
-    @Override @Nullable
+    @Override
     public VirtualRegister get(Node node) {
+        VirtualRegister register = registers.get(node);
+        if (register == null) throw new NullPointerException("Node not assigned a register");
+        return register;
+    }
+
+    @Override @Nullable
+    public VirtualRegister getNullable(Node node) {
         return registers.get(node);
     }
 
