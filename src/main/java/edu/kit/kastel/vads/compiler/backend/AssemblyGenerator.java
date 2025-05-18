@@ -59,17 +59,32 @@ public class AssemblyGenerator {
         Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
 
-        assignTempIfVirtual(destination);
-        move(left, physical(destination));
-        builder.append(
+        if (right instanceof PhysicalRegister && right.equals(destination)) {
+            moveToTempIfVirtual(left);
+            builder.append(
                 String.format(
-                        "%s %s, %s\n",
-                        assemblyInstructionName,
-                        right.registerName(),
-                        physical(destination).registerName()
+                    "%s %s, %s\n",
+                    assemblyInstructionName,
+                    right.registerName(),
+                    physical(left).registerName()
                 )
-        );
-        moveToStackIfVirtual(destination);
+            );
+            move(physical(left), destination);
+            discardTemp();
+
+        } else {
+            assignTempIfVirtual(destination);
+            move(left, physical(destination));
+            builder.append(
+                String.format(
+                    "%s %s, %s\n",
+                    assemblyInstructionName,
+                    right.registerName(),
+                    physical(destination).registerName()
+                )
+            );
+            moveToStackIfVirtual(destination);
+        }
     }
 
     private void divMod(BinaryOperationNode node) {
