@@ -44,9 +44,9 @@ public class AssemblyGenerator {
 
     private void generateForInstruction(Instruction instruction) {
         switch (instruction.getNode()) {
-            case AddNode add -> binary(add, "addl");
-            case SubNode sub -> binary(sub, "subl");
-            case MulNode mul -> binary(mul, "imull");
+            case AddNode add -> binary(add, "addl", true);
+            case SubNode sub -> binary(sub, "subl", false);
+            case MulNode mul -> binary(mul, "imull", true);
             case DivNode div -> divMod(div);
             case ModNode mod -> divMod(mod);
             case ReturnNode r -> returnInstruction(r);
@@ -56,37 +56,32 @@ public class AssemblyGenerator {
         }
     }
 
-    private void binary(BinaryOperationNode node, String assemblyInstructionName) {
+    private void binary(BinaryOperationNode node, String assemblyInstructionName, boolean commutative) {
         Register destination = registerAllocator.get(node);
         Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
 
-        if (right instanceof PhysicalRegister && right.equals(destination)) {
-            moveToTempIfVirtual(left);
-            builder.append(
-                String.format(
-                    "%s %s, %s\n",
-                    assemblyInstructionName,
-                    right.registerName(),
-                    physical(left).registerName()
-                )
-            );
-            move(physical(left), destination);
-            discardTemp();
-
-        } else {
-            assignTempIfVirtual(destination);
-            move(left, physical(destination));
-            builder.append(
-                String.format(
-                    "%s %s, %s\n",
-                    assemblyInstructionName,
-                    right.registerName(),
-                    physical(destination).registerName()
-                )
-            );
-            moveToStackIfVirtual(destination);
+        if (right instanceof PhysicalRegister && right.equals(destination)) { // -> destination physical -> temp free
+            if (commutative) {
+                Register temp = left;
+                left = right;
+                right = temp;
+            } else {
+                move(right, PhysicalRegister.Temp);
+                right = PhysicalRegister.Temp;
+            }
         }
+        assignTempIfVirtual(destination);
+        move(left, physical(destination));
+        builder.append(
+            String.format(
+                "%s %s, %s\n",
+                assemblyInstructionName,
+                right.registerName(),
+                physical(destination).registerName()
+            )
+        );
+        moveToStackIfVirtual(destination);
     }
 
     private void divMod(BinaryOperationNode node) {
