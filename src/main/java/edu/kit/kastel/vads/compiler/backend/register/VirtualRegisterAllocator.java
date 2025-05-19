@@ -51,17 +51,6 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
         return registers.values();
     }
 
-    private void scan(Node node, Set<Node> visited) {
-        for (Node predecessor : node.predecessors()) {
-            if (visited.add(predecessor)) {
-                scan(predecessor, visited);
-            }
-        }
-        if (needsRegister(node)) {
-            this.registers.put(node, new VirtualRegister(this.id++));
-        }
-    }
-
     private static boolean needsRegister(Node node) {
         return !(node instanceof ProjNode || node instanceof StartNode || node instanceof Block || node instanceof ReturnNode);
     }
