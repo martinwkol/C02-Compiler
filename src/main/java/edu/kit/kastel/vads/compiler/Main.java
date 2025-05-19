@@ -65,7 +65,7 @@ public class Main {
                 virtualRA, interferenceGraph.computeRegisterAssignment()
         );*/
         RegisterMapping registerMapping = interferenceGraph.computeRegisterMapping();
-        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, registerMapping, registerMapping.computeMaxStackSize());
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, registerMapping, registerMapping.computeMaxStackUsage());
 
 
         // Write assembly file

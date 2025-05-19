@@ -11,15 +11,15 @@ public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();
     private final RegisterMapping registerMapping;
     private @Nullable VirtualRegister storedInTemp;
-    private final int maxStackSize;
+    private final int maxStackUsage;
 
-    public AssemblyGenerator(InstructionBlock block, RegisterMapping registerMapping, int maxStackSize) {
+    public AssemblyGenerator(InstructionBlock block, RegisterMapping registerMapping, int maxStackUsage) {
         this.registerMapping = registerMapping;
-        this.maxStackSize = maxStackSize;
+        this.maxStackUsage = maxStackUsage;
         storedInTemp = null;
         addStarterCode();
-        if (maxStackSize > 0)
-            builder.append(String.format("subq $%d, %%rsp\n", maxStackSize));
+        if (maxStackUsage > 0)
+            builder.append(String.format("subq $%d, %%rsp\n", maxStackUsage));
         for (Instruction instruction : block.getInstructions()) {
             generateForInstruction(instruction);
         }
@@ -117,8 +117,8 @@ public class AssemblyGenerator {
     private void returnInstruction(ReturnInstruction returnInstruction) {
         Register returnRegister = returnInstruction.getReturnRegister(registerMapping);
         if (returnRegister != PhysicalRegister.Return) move(returnRegister, PhysicalRegister.Return);
-        if (maxStackSize > 0)
-            builder.append(String.format("addq $%d, %%rsp\n", maxStackSize));
+        if (maxStackUsage > 0)
+            builder.append(String.format("addq $%d, %%rsp\n", maxStackUsage));
         builder.append("ret\n");
     }
 
