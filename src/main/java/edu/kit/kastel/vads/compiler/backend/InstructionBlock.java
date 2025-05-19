@@ -61,6 +61,8 @@ public class InstructionBlock {
         instructions.add(new DivModInstruction(right));
         if (node instanceof DivNode) {
             instructions.add(new MoveInstruction(PhysicalRegister.Quotient, destination));
+        } else {
+            instructions.add(new MoveInstruction(PhysicalRegister.Remainder, destination));
         }
     }
 
