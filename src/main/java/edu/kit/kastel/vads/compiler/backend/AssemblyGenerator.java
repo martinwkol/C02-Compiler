@@ -1,5 +1,6 @@
 package edu.kit.kastel.vads.compiler.backend;
 
+import edu.kit.kastel.vads.compiler.backend.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
@@ -8,7 +9,6 @@ import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
-import static java.util.Collections.swap;
 
 public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();

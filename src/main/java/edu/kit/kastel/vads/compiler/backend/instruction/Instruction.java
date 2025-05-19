@@ -1,9 +1,9 @@
-package edu.kit.kastel.vads.compiler.backend;
+package edu.kit.kastel.vads.compiler.backend.instruction;
 
+import edu.kit.kastel.vads.compiler.backend.InterferenceGraph;
 import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
-import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
 import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
@@ -12,38 +12,15 @@ import java.util.Set;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
-public class Instruction {
-    private final Node node;
-    private final Set<Register> live = new HashSet<>();
-    private final Set<Register> defines = new HashSet<>();
-    private final Set<Register> uses = new HashSet<>();
-    private final Set<Instruction> successors = new HashSet<>();
-    private boolean hasImmediateSuccessor;
+public abstract class Instruction {
+    protected final Set<Register> live = new HashSet<>();
+    protected final Set<Register> defines = new HashSet<>();
+    protected final Set<Register> uses = new HashSet<>();
+    protected final Set<Instruction> successors = new HashSet<>();
+    protected boolean hasImmediateSuccessor;
 
-    public Instruction(Node node, RegisterAllocator registerAllocator) {
-        this.node = node;
-        hasImmediateSuccessor = true;
-
-        switch (node) {
-            case BinaryOperationNode bNode -> {
-                initBinary(bNode, registerAllocator);
-                if (bNode instanceof DivNode || bNode instanceof ModNode) {
-                    definesDivRegisters();
-                }
-            }
-            case ReturnNode r -> {
-                addDefines(PhysicalRegister.Return);
-                addUses(registerAllocator.get(predecessorSkipProj(r, ReturnNode.RESULT)));
-                hasImmediateSuccessor = false;
-            }
-            case ConstIntNode c -> addDefines(registerAllocator.get(c));
-            case Phi _ -> throw new UnsupportedOperationException("phi");
-            case Block _, ProjNode _, StartNode _ -> {}
-        }
-    }
-
-    public Node getNode() {
-        return node;
+    public Instruction(boolean hasImmediateSuccessor) {
+        this.hasImmediateSuccessor = hasImmediateSuccessor;
     }
 
     private void initBinary(BinaryOperationNode bNode, RegisterAllocator registerAllocator) {
@@ -62,12 +39,12 @@ public class Instruction {
         addDefines(PhysicalRegister.Remainder);
     }
 
-    private void addDefines(@Nullable Register register) {
+    protected void addDefines(@Nullable Register register) {
         if (register == null) throw new IllegalArgumentException("Attempted to define null register");
         defines.add(register);
     }
 
-    private void addUses(@Nullable Register register) {
+    protected void addUses(@Nullable Register register) {
         if (register != null) uses.add(register);
     }
 

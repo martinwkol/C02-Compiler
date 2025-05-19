@@ -1,6 +1,6 @@
 package edu.kit.kastel.vads.compiler.backend;
 
-import edu.kit.kastel.vads.compiler.backend.register.Register;
+import edu.kit.kastel.vads.compiler.backend.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
