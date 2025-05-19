@@ -91,27 +91,6 @@ public class AssemblyGenerator {
         moveToTempIfVirtual(divisor);
         builder.append(String.format("idivl %s\n", physical(divisor)));
         discardTemp();
-
-
-        /*
-        Register destination = registerAllocator.get(node);
-        Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
-        Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
-
-
-
-        if (right instanceof VirtualRegister || right.equals(PhysicalRegister.DividendLS) ||
-                right.equals(PhysicalRegister.DividendMS)) {
-            move(right, PhysicalRegister.Temp);
-            right = PhysicalRegister.Temp;
-        }
-        move(left, PhysicalRegister.DividendLS);
-        builder.append("cltd\n");
-        builder.append(String.format("idivl %s\n", right));
-        if (node instanceof DivNode && destination != PhysicalRegister.Quotient)
-            move(PhysicalRegister.Quotient, destination);
-        if (node instanceof ModNode && destination != PhysicalRegister.Remainder)
-            move(PhysicalRegister.Remainder, destination);*/
     }
 
     private void returnInstruction(ReturnInstruction returnInstruction) {
