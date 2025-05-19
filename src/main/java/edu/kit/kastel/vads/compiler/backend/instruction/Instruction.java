@@ -23,22 +23,6 @@ public abstract sealed class Instruction permits BinaryOperationInstruction, Con
         this.hasImmediateSuccessor = hasImmediateSuccessor;
     }
 
-    private void initBinary(BinaryOperationNode bNode, RegisterAllocator registerAllocator) {
-        Register destination = registerAllocator.get(bNode);
-        Register left = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.LEFT));
-        Register right = registerAllocator.get(predecessorSkipProj(bNode, BinaryOperationNode.RIGHT));
-        addDefines(destination);
-        addUses(left);
-        addUses(right);
-    }
-
-    private void definesDivRegisters() {
-        addDefines(PhysicalRegister.DividendLS);
-        addDefines(PhysicalRegister.DividendMS);
-        addDefines(PhysicalRegister.Quotient);
-        addDefines(PhysicalRegister.Remainder);
-    }
-
     protected void addDefines(@Nullable Register register) {
         if (register == null) throw new IllegalArgumentException("Attempted to define null register");
         defines.add(register);
