@@ -4,6 +4,7 @@ import edu.kit.kastel.vads.compiler.backend.AssemblyGenerator;
 import edu.kit.kastel.vads.compiler.backend.InstructionBlock;
 import edu.kit.kastel.vads.compiler.backend.InterferenceGraph;
 import edu.kit.kastel.vads.compiler.backend.register.OptimizedRegisterAllocator;
+import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.SsaTranslation;
@@ -60,10 +61,11 @@ public class Main {
         ib.deduceLiveness();
 
         InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
-        OptimizedRegisterAllocator optimizedRA = new OptimizedRegisterAllocator(
+        /*OptimizedRegisterAllocator optimizedRA = new OptimizedRegisterAllocator(
                 virtualRA, interferenceGraph.computeRegisterAssignment()
-        );
-        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, optimizedRA);
+        );*/
+        RegisterMapping registerMapping = interferenceGraph.computeRegisterMapping();
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, registerMapping, registerMapping.computeMaxStackSize());
 
 
         // Write assembly file
