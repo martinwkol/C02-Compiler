@@ -11,6 +11,7 @@ public final class DivModInstruction extends Instruction {
         super(true);
         this.divisor = divisor;
 
+        addUses(divisor);
         addUses(PhysicalRegister.DividendLS);
         addUses(PhysicalRegister.DividendMS);
         addDefines(PhysicalRegister.Quotient);
