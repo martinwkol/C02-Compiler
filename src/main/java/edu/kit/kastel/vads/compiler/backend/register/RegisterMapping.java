@@ -1,5 +1,26 @@
 package edu.kit.kastel.vads.compiler.backend.register;
 
-public interface RegisterMapping {
-    Register get(Register register);
+import org.jspecify.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class RegisterMapping {
+    private final Map<Register, Register> mapping;
+
+    public RegisterMapping() {
+        mapping = new HashMap<>();
+    }
+
+    public RegisterMapping(Map<Register, Register> mapping) {
+        this.mapping = mapping;
+    }
+
+    public @Nullable Register put(Register key, Register value) {
+        return mapping.put(key, value);
+    }
+
+    public Register get(Register register) {
+        return mapping.get(register);
+    }
 }

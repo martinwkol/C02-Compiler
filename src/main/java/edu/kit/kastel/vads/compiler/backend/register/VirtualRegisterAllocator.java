@@ -7,9 +7,7 @@ import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
 import edu.kit.kastel.vads.compiler.ir.node.StartNode;
 import org.jspecify.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class VirtualRegisterAllocator implements RegisterAllocator {
     private int id;
@@ -47,6 +45,10 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
     @Override
     public int requiredStackSize() {
         return this.id * 8;
+    }
+
+    public Collection<VirtualRegister> usedRegisters() {
+        return registers.values();
     }
 
     private void scan(Node node, Set<Node> visited) {

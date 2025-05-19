@@ -1,6 +1,7 @@
 package edu.kit.kastel.vads.compiler.backend;
 
 import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
+import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 
@@ -28,14 +29,15 @@ public class InterferenceGraph {
         }
     }
 
-    public Map<Register, Register> computeRegisterAssignment() {
-        Map<Register, Register> assignment = Arrays.stream(PhysicalRegister.All)
+    public RegisterMapping computeRegisterMapping() {
+        Map<Register, Register> mapping =
+                Arrays.stream(PhysicalRegister.All)
                 .collect(Collectors.toMap(r -> r, r -> r));
         List<VirtualRegister> ordering = maxCardinalitySearch();
         for (VirtualRegister register : ordering) {
-            assignment.put(register, minFreeRegister(register, assignment));
+            mapping.put(register, minFreeRegister(register, mapping));
         }
-        return assignment;
+        return new RegisterMapping(mapping);
     }
 
     private List<VirtualRegister> maxCardinalitySearch() {
@@ -69,9 +71,9 @@ public class InterferenceGraph {
         return ordering;
     }
 
-    private Register minFreeRegister(Register register, Map<Register, Register> assignment) {
+    private Register minFreeRegister(Register register, Map<Register, Register> mapping) {
         Set<Register> neighbours = edges.get(register);
-        Set<Register> occupied = assignment.entrySet().stream()
+        Set<Register> occupied = mapping.entrySet().stream()
                 .filter(entry -> neighbours.contains(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet());

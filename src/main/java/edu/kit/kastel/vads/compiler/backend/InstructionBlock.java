@@ -1,15 +1,19 @@
 package edu.kit.kastel.vads.compiler.backend;
 
-import edu.kit.kastel.vads.compiler.backend.instruction.Instruction;
+import edu.kit.kastel.vads.compiler.backend.instruction.*;
+import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
+import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
-import edu.kit.kastel.vads.compiler.ir.node.Node;
+import edu.kit.kastel.vads.compiler.ir.node.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
 public class InstructionBlock {
     private final List<Instruction> instructions = new ArrayList<>();
@@ -33,8 +37,33 @@ public class InstructionBlock {
             }
         }
         registerAllocator.allocateRegister(node);
-        instructions.add(new Instruction(node, registerAllocator));
+
+        switch (node) {
+            case AddNode add -> instructions.add(new AddInstruction(add, registerAllocator));
+            case SubNode sub -> instructions.add(new SubInstruction(sub, registerAllocator));
+            case MulNode mul -> instructions.add(new MulInstruction(mul, registerAllocator));
+            case DivNode _, ModNode _ -> addDivMod(node);
+            case ReturnNode r -> instructions.add(new ReturnInstruction(r, registerAllocator));
+            case ConstIntNode c -> instructions.add(new ConstIntInstruction(c, registerAllocator));
+            case Phi _ -> throw new UnsupportedOperationException("phi");
+            case Block _, ProjNode _, StartNode _ -> {}
+        }
     }
+
+    private void addDivMod(Node node) {
+        assert node instanceof DivNode || node instanceof ModNode;
+        Register destination = registerAllocator.get(node);
+        Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
+        Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
+
+        instructions.add(new MoveInstruction(left, PhysicalRegister.DividendLS));
+        instructions.add(new CtldInstruction());
+        instructions.add(new DivModInstruction(right));
+        if (node instanceof DivNode) {
+            instructions.add(new MoveInstruction(PhysicalRegister.Quotient, destination));
+        }
+    }
+
 
     public void deduceLiveness() {
         for (Instruction instruction : instructions) {
@@ -56,11 +85,12 @@ public class InstructionBlock {
 
     public InterferenceGraph buildInterferenceGraph() {
         InterferenceGraph interferenceGraph = new InterferenceGraph();
+        for (VirtualRegister virtualRegister : registerAllocator.usedRegisters()) {
+            interferenceGraph.addRegister(virtualRegister);
+        }
         Instruction next = null;
         for (int i = instructions.size() - 1; i >= 0; --i) {
             Instruction instruction = instructions.get(i);
-            VirtualRegister register = registerAllocator.getNullable(instruction.getNode());
-            if (register != null) interferenceGraph.addRegister(register);
             instruction.addEdges(interferenceGraph, next);
             next = instruction;
         }
