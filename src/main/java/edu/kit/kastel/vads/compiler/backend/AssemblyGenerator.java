@@ -89,7 +89,8 @@ public class AssemblyGenerator {
         Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
 
-        if (right.equals(PhysicalRegister.DividendLS) || right.equals(PhysicalRegister.DividendMS)) {
+        if (right instanceof VirtualRegister || right.equals(PhysicalRegister.DividendLS) ||
+                right.equals(PhysicalRegister.DividendMS)) {
             move(right, PhysicalRegister.Temp);
             right = PhysicalRegister.Temp;
         }
