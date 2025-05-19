@@ -4,7 +4,7 @@ import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 
-public class DivModInstruction extends Instruction {
+public final class DivModInstruction extends Instruction {
     private final Register divisor;
 
     public DivModInstruction(Register divisor) {

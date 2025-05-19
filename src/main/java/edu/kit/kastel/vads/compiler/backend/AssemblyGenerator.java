@@ -1,10 +1,7 @@
 package edu.kit.kastel.vads.compiler.backend;
 
-import edu.kit.kastel.vads.compiler.backend.instruction.Instruction;
-import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
-import edu.kit.kastel.vads.compiler.backend.register.Register;
-import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
-import edu.kit.kastel.vads.compiler.backend.register.VirtualRegister;
+import edu.kit.kastel.vads.compiler.backend.instruction.*;
+import edu.kit.kastel.vads.compiler.backend.register.*;
 import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
@@ -12,15 +9,17 @@ import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipPr
 
 public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();
-    private final RegisterAllocator registerAllocator;
+    private final RegisterMapping registerMapping;
     private @Nullable VirtualRegister storedInTemp;
+    private final int maxStackSize;
 
-    public AssemblyGenerator(InstructionBlock block, RegisterAllocator registerAllocator) {
-        this.registerAllocator = registerAllocator;
+    public AssemblyGenerator(InstructionBlock block, RegisterMapping registerMapping, int maxStackSize) {
+        this.registerMapping = registerMapping;
+        this.maxStackSize = maxStackSize;
         storedInTemp = null;
         addStarterCode();
-        if (registerAllocator.requiredStackSize() > 0)
-            builder.append(String.format("subq $%d, %%rsp\n", registerAllocator.requiredStackSize()));
+        if (maxStackSize > 0)
+            builder.append(String.format("subq $%d, %%rsp\n", maxStackSize));
         for (Instruction instruction : block.getInstructions()) {
             generateForInstruction(instruction);
         }
@@ -43,23 +42,22 @@ public class AssemblyGenerator {
     }
 
     private void generateForInstruction(Instruction instruction) {
-        switch (instruction.getNode()) {
-            case AddNode add -> binary(add, "addl", true);
-            case SubNode sub -> binary(sub, "subl", false);
-            case MulNode mul -> binary(mul, "imull", true);
-            case DivNode div -> divMod(div);
-            case ModNode mod -> divMod(mod);
-            case ReturnNode r -> returnInstruction(r);
-            case ConstIntNode c -> constInt(c);
-            case Phi _ -> throw new UnsupportedOperationException("phi");
-            case Block _, ProjNode _, StartNode _ -> {}
+        switch (instruction) {
+            case AddInstruction add -> binary(add, "addl", true);
+            case SubInstruction sub -> binary(sub, "subl", false);
+            case MulInstruction mul -> binary(mul, "imull", true);
+            case CtldInstruction _ -> ctld();
+            case DivModInstruction dm -> divMod(dm);
+            case ReturnInstruction r -> returnInstruction(r);
+            case ConstIntInstruction c -> constInt(c);
+            case MoveInstruction m -> move(m.getSource(registerMapping), m.getDestination(registerMapping));
         }
     }
 
-    private void binary(BinaryOperationNode node, String assemblyInstructionName, boolean commutative) {
-        Register destination = registerAllocator.get(node);
-        Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
-        Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
+    private void binary(BinaryOperationInstruction node, String assemblyInstructionName, boolean commutative) {
+        Register destination = node.getDestination(registerMapping);
+        Register left = node.getLeft(registerMapping);
+        Register right = node.getRight(registerMapping);
 
         if (right instanceof PhysicalRegister && right.equals(destination)) { // -> destination physical -> temp free
             if (commutative) {
@@ -84,10 +82,23 @@ public class AssemblyGenerator {
         moveToStackIfVirtual(destination);
     }
 
-    private void divMod(BinaryOperationNode node) {
+    private void ctld() {
+        builder.append("cltd\n");
+    }
+
+    private void divMod(DivModInstruction dm) {
+        Register divisor = dm.getDivisor(registerMapping);
+        moveToTempIfVirtual(divisor);
+        builder.append(String.format("idivl %s\n", physical(divisor)));
+        discardTemp();
+
+
+        /*
         Register destination = registerAllocator.get(node);
         Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
+
+
 
         if (right instanceof VirtualRegister || right.equals(PhysicalRegister.DividendLS) ||
                 right.equals(PhysicalRegister.DividendMS)) {
@@ -100,21 +111,21 @@ public class AssemblyGenerator {
         if (node instanceof DivNode && destination != PhysicalRegister.Quotient)
             move(PhysicalRegister.Quotient, destination);
         if (node instanceof ModNode && destination != PhysicalRegister.Remainder)
-            move(PhysicalRegister.Remainder, destination);
+            move(PhysicalRegister.Remainder, destination);*/
     }
 
-    private void returnInstruction(ReturnNode returnNode) {
-        Register returnRegister = registerAllocator.get(predecessorSkipProj(returnNode, ReturnNode.RESULT));
+    private void returnInstruction(ReturnInstruction returnInstruction) {
+        Register returnRegister = returnInstruction.getReturnRegister(registerMapping);
         if (returnRegister != PhysicalRegister.Return) move(returnRegister, PhysicalRegister.Return);
-        if (registerAllocator.requiredStackSize() > 0)
-            builder.append(String.format("addq $%d, %%rsp\n", registerAllocator.requiredStackSize()));
+        if (maxStackSize > 0)
+            builder.append(String.format("addq $%d, %%rsp\n", maxStackSize));
         builder.append("ret\n");
     }
 
-    private void constInt(ConstIntNode constIntNode) {
-        Register destination = registerAllocator.get(constIntNode);
+    private void constInt(ConstIntInstruction constIntInstruction) {
+        Register destination = constIntInstruction.getDestination(registerMapping);
         assignTempIfVirtual(destination);
-        builder.append(String.format("movl $%d, %s\n", constIntNode.value(), physical(destination).registerName()));
+        builder.append(String.format("movl $%d, %s\n", constIntInstruction.getValue(), physical(destination).registerName()));
         moveToStackIfVirtual(destination);
     }
 

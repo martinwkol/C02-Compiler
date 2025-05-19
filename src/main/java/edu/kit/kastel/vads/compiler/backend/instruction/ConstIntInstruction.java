@@ -5,7 +5,7 @@ import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 import edu.kit.kastel.vads.compiler.ir.node.ConstIntNode;
 
-public class ConstIntInstruction extends Instruction {
+public final class ConstIntInstruction extends Instruction {
     private final Register destination;
     private final int value;
 

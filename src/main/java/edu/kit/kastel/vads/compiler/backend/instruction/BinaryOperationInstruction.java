@@ -7,7 +7,7 @@ import edu.kit.kastel.vads.compiler.ir.node.BinaryOperationNode;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
-public abstract class BinaryOperationInstruction extends Instruction {
+public abstract sealed class BinaryOperationInstruction extends Instruction permits AddInstruction, SubInstruction, MulInstruction {
     private final Register destination;
     private final Register left;
     private final Register right;

@@ -8,7 +8,7 @@ import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
-public class ReturnInstruction extends Instruction {
+public final class ReturnInstruction extends Instruction {
     private final Register returnRegister;
 
     public ReturnInstruction(ReturnNode node, RegisterAllocator registerAllocator) {

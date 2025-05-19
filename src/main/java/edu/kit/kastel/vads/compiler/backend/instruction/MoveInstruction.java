@@ -3,7 +3,7 @@ package edu.kit.kastel.vads.compiler.backend.instruction;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 
-public class MoveInstruction extends Instruction {
+public final class MoveInstruction extends Instruction {
     private final Register source;
     private final Register destination;
 
