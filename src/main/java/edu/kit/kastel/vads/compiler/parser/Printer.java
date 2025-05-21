@@ -1,20 +1,8 @@
 package edu.kit.kastel.vads.compiler.parser;
 
-import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
-import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NegateTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
-import edu.kit.kastel.vads.compiler.parser.ast.Tree;
-import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
-import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
-import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
+import edu.kit.kastel.vads.compiler.Position;
+import edu.kit.kastel.vads.compiler.Span;
+import edu.kit.kastel.vads.compiler.parser.ast.*;
 
 import java.util.List;
 
@@ -25,6 +13,7 @@ public class Printer {
     private final StringBuilder builder = new StringBuilder();
     private boolean requiresIndent;
     private int indentDepth;
+    private boolean ignoreSemicolon = false;
 
     public Printer(Tree ast) {
         this.ast = ast;
@@ -103,6 +92,42 @@ public class Printer {
                 }
                 semicolon();
             }
+            case IfTree(ExpressionTree condition, StatementTree conditionTrue, StatementTree conditionFalse, Position start) -> {
+                print("if (");
+                printTree(condition);
+                print(") ");
+                print(conditionTrue);
+                if (conditionFalse != null) {
+                    print("else ");
+                    print(conditionFalse);
+                }
+            }
+            case WhileTree(ExpressionTree condition, StatementTree body, Position start) -> {
+                print("while (");
+                printTree(condition);
+                print(") ");
+                print(body);
+            }
+            case ForTree(StatementTree initializer, ExpressionTree condition, StatementTree step, StatementTree body, Position start) -> {
+                ignoreSemicolon = true;
+                print("for (");
+                if (initializer != null) printTree(initializer);
+                print("; ");
+                printTree(condition);
+                print("; ");
+                if (step != null) print(step);
+                print(") ");
+                ignoreSemicolon = false;
+                print(body);
+            }
+            case BreakTree(Span span) -> {
+                print("break");
+                semicolon();
+            }
+            case ContinueTree(Span span) -> {
+                print("continue");
+                semicolon();
+            }
             case ReturnTree(var expr, _) -> {
                 print("return ");
                 printTree(expr);
@@ -127,6 +152,7 @@ public class Printer {
     }
 
     private void semicolon() {
+        if (ignoreSemicolon) return;
         this.builder.append(";");
         lineBreak();
     }
