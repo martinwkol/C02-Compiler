@@ -64,14 +64,16 @@ public class Parser {
         }
 
         StatementTree statement;
-        if (this.tokenSource.peek().isKeyword(KeywordType.INT)) {
-            statement = parseDeclaration();
-        } else if (this.tokenSource.peek().isKeyword(KeywordType.IF)) {
-            statement = parseIf();
-        } else if (this.tokenSource.peek().isKeyword(KeywordType.WHILE)) {
-            statement = parseWhile();
-        } else if (this.tokenSource.peek().isKeyword(KeywordType.RETURN)) {
-            statement = parseReturn();
+        if (this.tokenSource.peek() instanceof Keyword keyword) {
+            statement = switch (keyword.type()) {
+                case KeywordType.INT -> parseDeclaration();
+                case KeywordType.IF -> parseIf();
+                case KeywordType.WHILE -> parseWhile();
+                case KeywordType.BREAK -> parseBreak();
+                case KeywordType.CONTINUE -> parseContinue();
+                case KeywordType.RETURN -> parseReturn();
+                default -> throw new UnsupportedOperationException("Keyword " + keyword.type().name() + " cannot begin a statement");
+            };
         } else {
             statement = parseSimple();
         }
@@ -143,6 +145,16 @@ public class Parser {
         this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
         StatementTree loopBody = parseStatement();
         return new WhileTree(condition, loopBody, whileKeyword.span().start());
+    }
+
+    private StatementTree parseBreak() {
+        Keyword breakKeyword = this.tokenSource.expectKeyword(KeywordType.BREAK);
+        return new BreakTree(breakKeyword.span());
+    }
+
+    private StatementTree parseContinue() {
+        Keyword continueKeyword = this.tokenSource.expectKeyword(KeywordType.CONTINUE);
+        return new ContinueTree(continueKeyword.span());
     }
 
     private StatementTree parseReturn() {

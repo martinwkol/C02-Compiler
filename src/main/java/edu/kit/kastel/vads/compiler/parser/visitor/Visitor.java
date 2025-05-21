@@ -20,6 +20,10 @@ public interface Visitor<T, R> {
 
     R visit(WhileTree whileTree, T data);
 
+    R visit(BreakTree breakTree, T data);
+
+    R visit(ContinueTree continueTree, T data);
+
     R visit(LiteralTree literalTree, T data);
 
     R visit(LValueIdentTree lValueIdentTree, T data);
