@@ -10,22 +10,7 @@ import edu.kit.kastel.vads.compiler.lexer.Separator;
 import edu.kit.kastel.vads.compiler.lexer.Separator.SeparatorType;
 import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.lexer.Token;
-import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
-import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LValueTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NegateTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
-import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
-import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
+import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.type.BasicType;
 
@@ -74,9 +59,15 @@ public class Parser {
     }
 
     private StatementTree parseStatement() {
+        if (this.tokenSource.peek() instanceof Separator sep && sep.type() == SeparatorType.BRACE_OPEN) {
+            return parseBlock();
+        }
+
         StatementTree statement;
         if (this.tokenSource.peek().isKeyword(KeywordType.INT)) {
             statement = parseDeclaration();
+        } else if (this.tokenSource.peek().isKeyword(KeywordType.IF)) {
+            statement = parseIf();
         } else if (this.tokenSource.peek().isKeyword(KeywordType.RETURN)) {
             statement = parseReturn();
         } else {
@@ -126,6 +117,21 @@ public class Parser {
         }
         Identifier identifier = this.tokenSource.expectIdentifier();
         return new LValueIdentTree(name(identifier));
+    }
+
+    private StatementTree parseIf() {
+        Keyword ifKeyword = this.tokenSource.expectKeyword(KeywordType.IF);
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
+        ExpressionTree condition = parseExpression();
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
+
+        StatementTree conditionTrue = parseStatement();
+        StatementTree conditionFalse = null;
+        if (this.tokenSource.peek().isKeyword(KeywordType.ELSE)) {
+            this.tokenSource.expectKeyword(KeywordType.ELSE);
+            conditionFalse = parseStatement();
+        }
+        return new IfTree(condition, conditionTrue, conditionFalse, ifKeyword.span().start());
     }
 
     private StatementTree parseReturn() {
