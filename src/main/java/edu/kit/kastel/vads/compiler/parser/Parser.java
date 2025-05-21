@@ -59,26 +59,39 @@ public class Parser {
     }
 
     private StatementTree parseStatement() {
+        // Block statement
         if (this.tokenSource.peek() instanceof Separator sep && sep.type() == SeparatorType.BRACE_OPEN) {
             return parseBlock();
         }
 
-        StatementTree statement;
+        StatementTree statement = null;
+        // Control statements
         if (this.tokenSource.peek() instanceof Keyword keyword) {
             statement = switch (keyword.type()) {
-                case KeywordType.INT -> parseDeclaration();
                 case KeywordType.IF -> parseIf();
                 case KeywordType.WHILE -> parseWhile();
+                case KeywordType.FOR -> parseFor();
                 case KeywordType.BREAK -> parseBreak();
                 case KeywordType.CONTINUE -> parseContinue();
                 case KeywordType.RETURN -> parseReturn();
-                default -> throw new UnsupportedOperationException("Keyword " + keyword.type().name() + " cannot begin a statement");
+                default -> null;
             };
-        } else {
-            statement = parseSimple();
+        }
+
+        // Declaration and simple statements
+        if (statement == null) {
+            statement = parseDecSimple();
         }
         this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);
         return statement;
+    }
+
+    private StatementTree parseDecSimple() {
+        if (this.tokenSource.peek().isKeyword(KeywordType.INT)) {
+            return parseDeclaration();
+        } else {
+            return parseSimple();
+        }
     }
 
     private StatementTree parseDeclaration() {
@@ -145,6 +158,29 @@ public class Parser {
         this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
         StatementTree loopBody = parseStatement();
         return new WhileTree(condition, loopBody, whileKeyword.span().start());
+    }
+
+    private StatementTree parseFor() {
+        Keyword forKeyword = this.tokenSource.expectKeyword(KeywordType.FOR);
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
+
+        StatementTree initializer = null;
+        if (!this.tokenSource.peek().isSeparator(SeparatorType.SEMICOLON)) {
+            initializer = parseDecSimple();
+        }
+        this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);
+
+        ExpressionTree condition = parseExpression();
+        this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);
+
+        StatementTree step = null;
+        if (!this.tokenSource.peek().isSeparator(SeparatorType.PAREN_CLOSE)) {
+            step = parseDecSimple();
+        }
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
+
+        StatementTree body = parseStatement();
+        return new ForTree(initializer, condition, step, body, forKeyword.span().start());
     }
 
     private StatementTree parseBreak() {

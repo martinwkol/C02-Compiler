@@ -3,11 +3,12 @@ package edu.kit.kastel.vads.compiler.parser.ast;
 import edu.kit.kastel.vads.compiler.Position;
 import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
+import org.jspecify.annotations.Nullable;
 
-public record WhileTree(ExpressionTree condition, StatementTree body, Position start) implements StatementTree {
+public record ForTree(@Nullable StatementTree initializer, ExpressionTree condition, @Nullable StatementTree step, StatementTree body, Position start) implements StatementTree {
     @Override
     public Span span() {
-        return new Span.SimpleSpan(start, body.span().end());
+        return new Span.SimpleSpan(start, body().span().end());
     }
 
     @Override
