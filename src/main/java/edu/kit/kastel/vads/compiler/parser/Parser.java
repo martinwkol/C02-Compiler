@@ -68,6 +68,8 @@ public class Parser {
             statement = parseDeclaration();
         } else if (this.tokenSource.peek().isKeyword(KeywordType.IF)) {
             statement = parseIf();
+        } else if (this.tokenSource.peek().isKeyword(KeywordType.WHILE)) {
+            statement = parseWhile();
         } else if (this.tokenSource.peek().isKeyword(KeywordType.RETURN)) {
             statement = parseReturn();
         } else {
@@ -132,6 +134,15 @@ public class Parser {
             conditionFalse = parseStatement();
         }
         return new IfTree(condition, conditionTrue, conditionFalse, ifKeyword.span().start());
+    }
+
+    private StatementTree parseWhile() {
+        Keyword whileKeyword = this.tokenSource.expectKeyword(KeywordType.WHILE);
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
+        ExpressionTree condition = parseExpression();
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
+        StatementTree loopBody = parseStatement();
+        return new WhileTree(condition, loopBody, whileKeyword.span().start());
     }
 
     private StatementTree parseReturn() {

@@ -18,6 +18,8 @@ public interface Visitor<T, R> {
 
     R visit(IfTree ifTree, T data);
 
+    R visit(WhileTree whileTree, T data);
+
     R visit(LiteralTree literalTree, T data);
 
     R visit(LValueIdentTree lValueIdentTree, T data);
