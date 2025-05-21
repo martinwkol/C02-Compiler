@@ -128,7 +128,7 @@ public class Printer {
                 print("continue");
                 semicolon();
             }
-            case TernaryConditionalTree(ExpressionTree condition, ExpressionTree caseTrue, ExpressionTree caseFalse) -> {
+            case TernaryConditionTree(ExpressionTree condition, ExpressionTree caseTrue, ExpressionTree caseFalse) -> {
                 printTree(condition);
                 print(" ? ");
                 printTree(caseTrue);

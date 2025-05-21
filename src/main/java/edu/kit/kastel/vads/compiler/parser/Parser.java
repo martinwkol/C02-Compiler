@@ -200,6 +200,18 @@ public class Parser {
     }
 
     private ExpressionTree parseExpression() {
+        ExpressionTree cond = parsePlusMinus();
+        while (this.tokenSource.peek().isOperator(OperatorType.QUESTION)) {
+            this.tokenSource.expectOperator(OperatorType.QUESTION);
+            ExpressionTree caseTrue = parseExpression();
+            this.tokenSource.expectOperator(OperatorType.COLON);
+            ExpressionTree caseFalse = parseExpression();
+            cond = new TernaryConditionTree(cond, caseTrue, caseFalse);
+        }
+        return cond;
+    }
+
+    private ExpressionTree parsePlusMinus() {
         ExpressionTree lhs = parseTerm();
         while (true) {
             if (this.tokenSource.peek() instanceof Operator(var type, _)

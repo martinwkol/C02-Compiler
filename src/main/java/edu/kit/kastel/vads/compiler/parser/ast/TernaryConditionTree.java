@@ -3,7 +3,7 @@ package edu.kit.kastel.vads.compiler.parser.ast;
 import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
-public record TernaryConditionalTree(ExpressionTree condition, ExpressionTree caseTrue, ExpressionTree caseFalse) implements StatementTree {
+public record TernaryConditionTree(ExpressionTree condition, ExpressionTree caseTrue, ExpressionTree caseFalse) implements ExpressionTree {
     @Override
     public Span span() {
         return condition.span().merge(caseFalse.span());

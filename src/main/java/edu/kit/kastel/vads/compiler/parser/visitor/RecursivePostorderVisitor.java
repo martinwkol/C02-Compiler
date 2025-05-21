@@ -107,11 +107,11 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
         return this.visitor.visit(continueTree, data);
     }
 
-    public R visit(TernaryConditionalTree ternaryConditionalTree, T data) {
-        R r = ternaryConditionalTree.condition().accept(this, data);
-        r = ternaryConditionalTree.caseTrue().accept(this, accumulate(data, r));
-        r = ternaryConditionalTree.caseFalse().accept(this, accumulate(data, r));
-        r = this.visitor.visit(ternaryConditionalTree, accumulate(data, r));
+    public R visit(TernaryConditionTree ternaryConditionTree, T data) {
+        R r = ternaryConditionTree.condition().accept(this, data);
+        r = ternaryConditionTree.caseTrue().accept(this, accumulate(data, r));
+        r = ternaryConditionTree.caseFalse().accept(this, accumulate(data, r));
+        r = this.visitor.visit(ternaryConditionTree, accumulate(data, r));
         return r;
     }
 

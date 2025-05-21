@@ -62,7 +62,7 @@ public interface NoOpVisitor<T> extends Visitor<T, Unit> {
     }
 
     @Override
-    default Unit visit(TernaryConditionalTree ternaryConditionalTree, T data) {
+    default Unit visit(TernaryConditionTree ternaryConditionTree, T data) {
         return Unit.INSTANCE;
     }
 
