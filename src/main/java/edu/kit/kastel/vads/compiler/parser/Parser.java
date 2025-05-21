@@ -213,28 +213,22 @@ public class Parser {
 
     private ExpressionTree parsePlusMinus() {
         ExpressionTree lhs = parseMulDivMod();
-        while (true) {
-            if (this.tokenSource.peek() instanceof Operator(var type, _)
-                    && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
-                this.tokenSource.consume();
-                lhs = new BinaryOperationTree(lhs, parseMulDivMod(), type);
-            } else {
-                return lhs;
-            }
+        while (this.tokenSource.peek() instanceof Operator(var type, _)
+                && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseMulDivMod(), type);
         }
+        return lhs;
     }
 
     private ExpressionTree parseMulDivMod() {
         ExpressionTree lhs = parseFactor();
-        while (true) {
-            if (this.tokenSource.peek() instanceof Operator(var type, _)
+        while (this.tokenSource.peek() instanceof Operator(var type, _)
                 && (type == OperatorType.MUL || type == OperatorType.DIV || type == OperatorType.MOD)) {
-                this.tokenSource.consume();
-                lhs = new BinaryOperationTree(lhs, parseFactor(), type);
-            } else {
-                return lhs;
-            }
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseFactor(), type);
         }
+        return lhs;
     }
 
     private ExpressionTree parseFactor() {
