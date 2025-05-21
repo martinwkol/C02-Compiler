@@ -212,19 +212,19 @@ public class Parser {
     }
 
     private ExpressionTree parsePlusMinus() {
-        ExpressionTree lhs = parseTerm();
+        ExpressionTree lhs = parseMulDivMod();
         while (true) {
             if (this.tokenSource.peek() instanceof Operator(var type, _)
-                && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
+                    && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
                 this.tokenSource.consume();
-                lhs = new BinaryOperationTree(lhs, parseTerm(), type);
+                lhs = new BinaryOperationTree(lhs, parseMulDivMod(), type);
             } else {
                 return lhs;
             }
         }
     }
 
-    private ExpressionTree parseTerm() {
+    private ExpressionTree parseMulDivMod() {
         ExpressionTree lhs = parseFactor();
         while (true) {
             if (this.tokenSource.peek() instanceof Operator(var type, _)
