@@ -26,6 +26,8 @@ public interface Visitor<T, R> {
 
     R visit(ContinueTree continueTree, T data);
 
+    R visit(TernaryConditionalTree ternaryConditionalTree, T data);
+
     R visit(LiteralTree literalTree, T data);
 
     R visit(LValueIdentTree lValueIdentTree, T data);
