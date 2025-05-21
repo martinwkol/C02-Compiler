@@ -55,21 +55,8 @@ public class Main {
             }
         }
 
-        // TODO: generate assembly and invoke gcc instead of generating abstract assembly
-        VirtualRegisterAllocator virtualRA = new VirtualRegisterAllocator();
-        InstructionBlock ib = new InstructionBlock(graphs.getFirst(), virtualRA);
-        ib.deduceLiveness();
-
-        InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
-        /*OptimizedRegisterAllocator optimizedRA = new OptimizedRegisterAllocator(
-                virtualRA, interferenceGraph.computeRegisterAssignment()
-        );*/
-        RegisterMapping registerMapping = interferenceGraph.computeRegisterMapping();
-        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, registerMapping, registerMapping.computeMaxStackUsage());
-
-
         // Write assembly file
-        Files.writeString(assembly, assemblyGenerator.getAssembly());
+        Files.writeString(assembly, generateAssembly(graphs));
 
         // Compile assembly
         ProcessBuilder pb = new ProcessBuilder("gcc", assembly.toString(), "-o", output.toString());
@@ -89,6 +76,18 @@ public class Main {
             System.exit(42);
             throw new AssertionError("unreachable");
         }
+    }
+
+    private static String generateAssembly(List<IrGraph> graphs) {
+        VirtualRegisterAllocator virtualRA = new VirtualRegisterAllocator();
+        InstructionBlock ib = new InstructionBlock(graphs.getFirst(), virtualRA);
+        ib.deduceLiveness();
+
+        InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
+        RegisterMapping registerMapping = interferenceGraph.computeRegisterMapping();
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, registerMapping, registerMapping.computeMaxStackUsage());
+
+        return assemblyGenerator.getAssembly();
     }
 
     private static void dumpGraph(IrGraph graph, Path path, String key) throws IOException {
