@@ -205,9 +205,9 @@ public class Parser {
         ExpressionTree cond = parsePlusMinus();
         while (this.tokenSource.peek().isOperator(OperatorType.QUESTION)) {
             this.tokenSource.expectOperator(OperatorType.QUESTION);
-            ExpressionTree caseTrue = parsePlusMinus();
+            ExpressionTree caseTrue = parseExpression();
             this.tokenSource.expectOperator(OperatorType.COLON);
-            ExpressionTree caseFalse = parsePlusMinus();
+            ExpressionTree caseFalse = parseExpression();
             cond = new TernaryConditionTree(cond, caseTrue, caseFalse);
         }
         return cond;
