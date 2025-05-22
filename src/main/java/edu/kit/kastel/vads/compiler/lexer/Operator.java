@@ -7,6 +7,11 @@ import java.util.List;
 public record Operator(OperatorType type, Span span) implements Token {
 
     @Override
+    public boolean isOperator(OperatorType operatorType) {
+        return type() == operatorType;
+    }
+
+    @Override
     public boolean isOperator(OperatorType... operatorType) {
         return List.of(operatorType).contains(type());
     }

@@ -6,11 +6,23 @@ public sealed interface Token permits ErrorToken, Identifier, Keyword, NumberLit
 
     Span span();
 
+    default boolean isKeyword(KeywordType keywordType) {
+        return false;
+    }
+
     default boolean isKeyword(KeywordType... keywordType) {
         return false;
     }
 
+    default boolean isOperator(Operator.OperatorType operatorType) {
+        return false;
+    }
+
     default boolean isOperator(Operator.OperatorType... operatorType) {
+        return false;
+    }
+
+    default boolean isSeparator(Separator.SeparatorType separatorType) {
         return false;
     }
 

@@ -35,6 +35,15 @@ public class TokenSource {
         return this.tokens.get(this.idx);
     }
 
+    public Keyword expectKeyword(KeywordType type) {
+        Token token = peek();
+        if (!(token instanceof Keyword kw) || kw.type() != type) {
+            throw new ParseException("expected keyword '" + type + "' but got " + token);
+        }
+        this.idx++;
+        return kw;
+    }
+
     public Keyword expectKeyword(KeywordType... type) {
         Token token = peek();
         List<KeywordType> typeList = List.of(type);
@@ -43,6 +52,15 @@ public class TokenSource {
         }
         this.idx++;
         return kw;
+    }
+
+    public Separator expectSeparator(SeparatorType type) {
+        Token token = peek();
+        if (!(token instanceof Separator sep) || sep.type() != type) {
+            throw new ParseException("expected separator '" + type + "' but got " + token);
+        }
+        this.idx++;
+        return sep;
     }
 
     public Separator expectSeparator(SeparatorType... type) {
@@ -55,6 +73,15 @@ public class TokenSource {
         return sep;
     }
 
+    public Operator expectOperator(OperatorType type) {
+        Token token = peek();
+        if (!(token instanceof Operator op) || op.type() != type) {
+            throw new ParseException("expected operator '" + type + "' but got " + token);
+        }
+        this.idx++;
+        return op;
+    }
+
     public Operator expectOperator(OperatorType... type) {
         Token token = peek();
         List<OperatorType> typeList = List.of(type);
@@ -64,6 +91,7 @@ public class TokenSource {
         this.idx++;
         return op;
     }
+
     public Identifier expectIdentifier() {
         Token token = peek();
         if (!(token instanceof Identifier ident)) {

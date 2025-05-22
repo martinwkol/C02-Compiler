@@ -7,6 +7,11 @@ import java.util.List;
 public record Separator(SeparatorType type, Span span) implements Token {
 
     @Override
+    public boolean isSeparator(SeparatorType separatorType) {
+        return type() == separatorType;
+    }
+
+    @Override
     public boolean isSeparator(SeparatorType... separatorType) {
         return List.of(separatorType).contains(type());
     }
