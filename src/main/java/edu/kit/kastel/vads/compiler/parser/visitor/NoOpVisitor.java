@@ -12,10 +12,11 @@ public interface NoOpVisitor<T> extends Visitor<T, Unit> {
     }
 
     @Override
-    default Unit visit(ArithmeticOperationTree arithmeticOperationTree, T data) {
+    default Unit visit(BinaryOperationTree binaryOperationTree, T data) {
         return Unit.INSTANCE;
     }
 
+    /*
     @Override
     default Unit visit(RelationalOperationTree relationalOperationTree, T data) {
         return Unit.INSTANCE;
@@ -25,6 +26,12 @@ public interface NoOpVisitor<T> extends Visitor<T, Unit> {
     default Unit visit(BitwiseOperationTree bitwiseOperationTree, T data) {
         return Unit.INSTANCE;
     }
+
+    @Override
+    default Unit visit(LogicalOperationTree logicalOperationTree, T data) {
+        return Unit.INSTANCE;
+    }
+    */
 
     @Override
     default Unit visit(BlockTree blockTree, T data) {

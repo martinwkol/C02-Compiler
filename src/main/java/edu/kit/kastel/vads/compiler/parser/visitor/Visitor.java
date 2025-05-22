@@ -6,11 +6,14 @@ public interface Visitor<T, R> {
 
     R visit(AssignmentTree assignmentTree, T data);
 
-    R visit(ArithmeticOperationTree arithmeticOperationTree, T data);
+    R visit(BinaryOperationTree binaryOperationTree, T data);
 
+    /*
     R visit(RelationalOperationTree relationalOperationTree, T data);
 
     R visit(BitwiseOperationTree bitwiseOperationTree, T data);
+
+    R visit(LogicalOperationTree logicalOperationTree, T data);*/
 
     R visit(BlockTree blockTree, T data);
 

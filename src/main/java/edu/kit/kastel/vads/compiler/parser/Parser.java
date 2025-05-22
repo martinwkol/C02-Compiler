@@ -202,7 +202,7 @@ public class Parser {
     }
 
     private ExpressionTree parseExpression() {
-        ExpressionTree cond = parsePlusMinus();
+        ExpressionTree cond = parseLogicalOr();
         while (this.tokenSource.peek().isOperator(OperatorType.QUESTION)) {
             this.tokenSource.expectOperator(OperatorType.QUESTION);
             ExpressionTree caseTrue = parseExpression();
@@ -213,12 +213,88 @@ public class Parser {
         return cond;
     }
 
+    private ExpressionTree parseLogicalOr() {
+        ExpressionTree lhs = parseLogicalAnd();
+        while (this.tokenSource.peek().isOperator(OperatorType.LOGICAL_OR)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseLogicalAnd(), OperatorType.LOGICAL_OR);
+        }
+        return lhs;
+    }
+
+    private ExpressionTree parseLogicalAnd() {
+        ExpressionTree lhs = parseBitwiseOr();
+        while (this.tokenSource.peek().isOperator(OperatorType.LOGICAL_AND)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseBitwiseOr(), OperatorType.LOGICAL_AND);
+        }
+        return lhs;
+    }
+
+    private ExpressionTree parseBitwiseOr() {
+        ExpressionTree lhs = parseBitwiseXor();
+        while (this.tokenSource.peek().isOperator(OperatorType.BITWISE_OR)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseBitwiseXor(), OperatorType.BITWISE_OR);
+        }
+        return lhs;
+    }
+
+    private ExpressionTree parseBitwiseXor() {
+        ExpressionTree lhs = parseBitwiseAnd();
+        while (this.tokenSource.peek().isOperator(OperatorType.BITWISE_XOR)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseBitwiseAnd(), OperatorType.BITWISE_XOR);
+        }
+        return lhs;
+    }
+
+    private ExpressionTree parseBitwiseAnd() {
+        ExpressionTree lhs = parseDisEquality();
+        while (this.tokenSource.peek().isOperator(OperatorType.BITWISE_AND)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseDisEquality(), OperatorType.BITWISE_AND);
+        }
+        return lhs;
+    }
+
+    private ExpressionTree parseDisEquality() {
+        ExpressionTree lhs = parseIntegerComparison();
+        while (this.tokenSource.peek() instanceof Operator(var type, _)
+                && (type == OperatorType.EQUALITY || type == OperatorType.DISEQUALITY)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseIntegerComparison(), type);
+        }
+        return lhs;
+    }
+
+    private ExpressionTree parseIntegerComparison() {
+        ExpressionTree lhs = parseShift();
+        while (this.tokenSource.peek() instanceof Operator(var type, _)
+                && (type == OperatorType.SMALLER || type == OperatorType.SMALLER_EQUAL
+                    || type == OperatorType.BIGGER || type == OperatorType.BIGGER_EQUAL)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parseShift(), type);
+        }
+        return lhs;
+    }
+
+    private ExpressionTree parseShift() {
+        ExpressionTree lhs = parsePlusMinus();
+        while (this.tokenSource.peek() instanceof Operator(var type, _)
+                && (type == OperatorType.SHIFT_LEFT || type == OperatorType.SHIFT_RIGHT)) {
+            this.tokenSource.consume();
+            lhs = new BinaryOperationTree(lhs, parsePlusMinus(), type);
+        }
+        return lhs;
+    }
+
     private ExpressionTree parsePlusMinus() {
         ExpressionTree lhs = parseMulDivMod();
         while (this.tokenSource.peek() instanceof Operator(var type, _)
                 && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
             this.tokenSource.consume();
-            lhs = new ArithmeticOperationTree(lhs, parseMulDivMod(), type);
+            lhs = new BinaryOperationTree(lhs, parseMulDivMod(), type);
         }
         return lhs;
     }
@@ -228,7 +304,7 @@ public class Parser {
         while (this.tokenSource.peek() instanceof Operator(var type, _)
                 && (type == OperatorType.MUL || type == OperatorType.DIV || type == OperatorType.MOD)) {
             this.tokenSource.consume();
-            lhs = new ArithmeticOperationTree(lhs, parseFactor(), type);
+            lhs = new BinaryOperationTree(lhs, parseFactor(), type);
         }
         return lhs;
     }
@@ -241,9 +317,11 @@ public class Parser {
                 this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
                 yield expression;
             }
-            case Operator(var type, _) when type == OperatorType.MINUS -> {
+            case Operator(var type, _) when
+                    type == OperatorType.MINUS || type == OperatorType.LOGICAL_NOT
+                    || type == OperatorType.BITWISE_NOT -> {
                 Span span = this.tokenSource.consume().span();
-                yield new NegateTree(parseFactor(), span);
+                yield new NegateTree(parseFactor(), type, span);
             }
             case Identifier ident -> {
                 this.tokenSource.consume();

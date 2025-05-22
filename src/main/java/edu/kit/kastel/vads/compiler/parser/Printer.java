@@ -1,6 +1,5 @@
 package edu.kit.kastel.vads.compiler.parser;
 
-import edu.kit.kastel.vads.compiler.Position;
 import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
@@ -58,9 +57,7 @@ public class Printer {
                 }
             }
             case TypeTree(var type, _) -> print(type.asString());
-            case ArithmeticOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
-            case RelationalOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
-            case BitwiseOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
+            case BinaryOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
             case LiteralTree(var value, _, _) -> this.builder.append(value);
             case NegateTree(ExpressionTree expression, Operator.OperatorType negationOp, _) -> {
                 this.builder.append(negationOp);
