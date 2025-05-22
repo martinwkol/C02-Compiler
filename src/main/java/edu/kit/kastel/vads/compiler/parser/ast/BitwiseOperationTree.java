@@ -4,10 +4,12 @@ import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
-public record NegateTree(ExpressionTree expression, Operator.OperatorType negationOp, Span negationPos) implements ExpressionTree {
+public record BitwiseOperationTree(
+        ExpressionTree lhs, ExpressionTree rhs, Operator.OperatorType operator
+) implements ExpressionTree {
     @Override
     public Span span() {
-        return negationPos().merge(expression().span());
+        return lhs().span().merge(rhs().span());
     }
 
     @Override

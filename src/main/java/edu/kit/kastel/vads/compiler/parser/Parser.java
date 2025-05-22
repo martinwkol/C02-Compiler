@@ -218,7 +218,7 @@ public class Parser {
         while (this.tokenSource.peek() instanceof Operator(var type, _)
                 && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseMulDivMod(), type);
+            lhs = new ArithmeticOperationTree(lhs, parseMulDivMod(), type);
         }
         return lhs;
     }
@@ -228,7 +228,7 @@ public class Parser {
         while (this.tokenSource.peek() instanceof Operator(var type, _)
                 && (type == OperatorType.MUL || type == OperatorType.DIV || type == OperatorType.MOD)) {
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseFactor(), type);
+            lhs = new ArithmeticOperationTree(lhs, parseFactor(), type);
         }
         return lhs;
     }

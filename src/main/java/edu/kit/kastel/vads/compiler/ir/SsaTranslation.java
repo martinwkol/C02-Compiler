@@ -8,7 +8,7 @@ import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
 import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ArithmeticOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
@@ -108,18 +108,18 @@ public class SsaTranslation {
         }
 
         @Override
-        public Optional<Node> visit(BinaryOperationTree binaryOperationTree, SsaTranslation data) {
-            pushSpan(binaryOperationTree);
-            Node lhs = binaryOperationTree.lhs().accept(this, data).orElseThrow();
-            Node rhs = binaryOperationTree.rhs().accept(this, data).orElseThrow();
-            Node res = switch (binaryOperationTree.operatorType()) {
+        public Optional<Node> visit(ArithmeticOperationTree arithmeticOperationTree, SsaTranslation data) {
+            pushSpan(arithmeticOperationTree);
+            Node lhs = arithmeticOperationTree.lhs().accept(this, data).orElseThrow();
+            Node rhs = arithmeticOperationTree.rhs().accept(this, data).orElseThrow();
+            Node res = switch (arithmeticOperationTree.operatorType()) {
                 case MINUS -> data.constructor.newSub(lhs, rhs);
                 case PLUS -> data.constructor.newAdd(lhs, rhs);
                 case MUL -> data.constructor.newMul(lhs, rhs);
                 case DIV -> projResultDivMod(data, data.constructor.newDiv(lhs, rhs));
                 case MOD -> projResultDivMod(data, data.constructor.newMod(lhs, rhs));
                 default ->
-                    throw new IllegalArgumentException("not a binary expression operator " + binaryOperationTree.operatorType());
+                    throw new IllegalArgumentException("not a binary expression operator " + arithmeticOperationTree.operatorType());
             };
             popSpan();
             return Optional.of(res);

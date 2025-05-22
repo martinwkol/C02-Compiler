@@ -21,10 +21,26 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
     }
 
     @Override
-    public R visit(BinaryOperationTree binaryOperationTree, T data) {
-        R r = binaryOperationTree.lhs().accept(this, data);
-        r = binaryOperationTree.rhs().accept(this, accumulate(data, r));
-        r = this.visitor.visit(binaryOperationTree, accumulate(data, r));
+    public R visit(ArithmeticOperationTree arithmeticOperationTree, T data) {
+        R r = arithmeticOperationTree.lhs().accept(this, data);
+        r = arithmeticOperationTree.rhs().accept(this, accumulate(data, r));
+        r = this.visitor.visit(arithmeticOperationTree, accumulate(data, r));
+        return r;
+    }
+
+    @Override
+    public R visit(RelationalOperationTree relationalOperationTree, T data) {
+        R r = relationalOperationTree.lhs().accept(this, data);
+        r = relationalOperationTree.rhs().accept(this, accumulate(data, r));
+        r = this.visitor.visit(relationalOperationTree, accumulate(data, r));
+        return r;
+    }
+
+    @Override
+    public R visit(BitwiseOperationTree bitwiseOperationTree, T data) {
+        R r = bitwiseOperationTree.lhs().accept(this, data);
+        r = bitwiseOperationTree.rhs().accept(this, accumulate(data, r));
+        r = this.visitor.visit(bitwiseOperationTree, accumulate(data, r));
         return r;
     }
 

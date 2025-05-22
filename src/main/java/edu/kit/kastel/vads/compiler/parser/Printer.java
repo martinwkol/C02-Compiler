@@ -2,6 +2,7 @@ package edu.kit.kastel.vads.compiler.parser;
 
 import edu.kit.kastel.vads.compiler.Position;
 import edu.kit.kastel.vads.compiler.Span;
+import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
 
 import java.util.List;
@@ -57,20 +58,13 @@ public class Printer {
                 }
             }
             case TypeTree(var type, _) -> print(type.asString());
-            case BinaryOperationTree(var lhs, var rhs, var op) -> {
-                print("(");
-                printTree(lhs);
-                print(")");
-                space();
-                this.builder.append(op);
-                space();
-                print("(");
-                printTree(rhs);
-                print(")");
-            }
+            case ArithmeticOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
+            case RelationalOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
+            case BitwiseOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
             case LiteralTree(var value, _, _) -> this.builder.append(value);
-            case NegateTree(var expression, _) -> {
-                print("-(");
+            case NegateTree(ExpressionTree expression, Operator.OperatorType negationOp, _) -> {
+                this.builder.append(negationOp);
+                print("(");
                 printTree(expression);
                 print(")");
             }
@@ -92,7 +86,7 @@ public class Printer {
                 }
                 semicolon();
             }
-            case IfTree(ExpressionTree condition, StatementTree conditionTrue, StatementTree conditionFalse, Position start) -> {
+            case IfTree(ExpressionTree condition, StatementTree conditionTrue, StatementTree conditionFalse, _) -> {
                 print("if (");
                 printTree(condition);
                 print(") ");
@@ -102,13 +96,13 @@ public class Printer {
                     print(conditionFalse);
                 }
             }
-            case WhileTree(ExpressionTree condition, StatementTree body, Position start) -> {
+            case WhileTree(ExpressionTree condition, StatementTree body, _) -> {
                 print("while (");
                 printTree(condition);
                 print(") ");
                 print(body);
             }
-            case ForTree(StatementTree initializer, ExpressionTree condition, StatementTree step, StatementTree body, Position start) -> {
+            case ForTree(StatementTree initializer, ExpressionTree condition, StatementTree step, StatementTree body, _) -> {
                 ignoreSemicolon = true;
                 print("for (");
                 if (initializer != null) printTree(initializer);
@@ -120,7 +114,7 @@ public class Printer {
                 ignoreSemicolon = false;
                 print(body);
             }
-            case BreakTree(Span span) -> {
+            case BreakTree(_) -> {
                 print("break");
                 semicolon();
             }
@@ -143,6 +137,18 @@ public class Printer {
             case LValueIdentTree(var name) -> printTree(name);
             case IdentExpressionTree(var name) -> printTree(name);
         }
+    }
+
+    private void binaryOperation(ExpressionTree lhs, ExpressionTree rhs, Operator.OperatorType op) {
+        print("(");
+        printTree(lhs);
+        print(")");
+        space();
+        this.builder.append(op);
+        space();
+        print("(");
+        printTree(rhs);
+        print(")");
     }
 
     private void print(String str) {
