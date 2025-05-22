@@ -43,7 +43,9 @@ public record Operator(OperatorType type, Span span) implements Token {
         BIGGER(">"),
         BIGGER_EQUAL(">="),
         SHIFT_LEFT("<<"),
+        ASSIGN_SHIFT_LEFT("<<="),
         SHIFT_RIGHT(">>"),
+        ASSIGN_SHIFT_RIGHT(">>="),
         LOGICAL_NOT("!"),
         BITWISE_NOT("~")
         ;
