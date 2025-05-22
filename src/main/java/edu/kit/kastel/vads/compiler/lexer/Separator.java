@@ -2,11 +2,13 @@ package edu.kit.kastel.vads.compiler.lexer;
 
 import edu.kit.kastel.vads.compiler.Span;
 
+import java.util.List;
+
 public record Separator(SeparatorType type, Span span) implements Token {
 
     @Override
-    public boolean isSeparator(SeparatorType separatorType) {
-        return type() == separatorType;
+    public boolean isSeparator(SeparatorType... separatorType) {
+        return List.of(separatorType).contains(type());
     }
 
     @Override

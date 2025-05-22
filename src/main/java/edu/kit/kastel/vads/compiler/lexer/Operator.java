@@ -2,11 +2,13 @@ package edu.kit.kastel.vads.compiler.lexer;
 
 import edu.kit.kastel.vads.compiler.Span;
 
+import java.util.List;
+
 public record Operator(OperatorType type, Span span) implements Token {
 
     @Override
-    public boolean isOperator(OperatorType operatorType) {
-        return type() == operatorType;
+    public boolean isOperator(OperatorType... operatorType) {
+        return List.of(operatorType).contains(type());
     }
 
     @Override
