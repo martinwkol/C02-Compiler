@@ -82,6 +82,12 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
     }
 
     @Override
+    public Unit visit(BoolLiteralTree boolLiteralTree, TypeMapping data) {
+        data.put(boolLiteralTree, BasicType.BOOL);
+        return NoOpVisitor.super.visit(boolLiteralTree, data);
+    }
+
+    @Override
     public Unit visit(BinaryOperationTree binaryOperationTree, TypeMapping data) {
         Type left = data.get(binaryOperationTree.lhs());
         Type right = data.get(binaryOperationTree.rhs());
@@ -161,5 +167,13 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
             throw new SemanticException("Non-boolean expression given as condition of while-loop");
         }
         return NoOpVisitor.super.visit(whileTree, data);
+    }
+
+    @Override
+    public Unit visit(ReturnTree returnTree, TypeMapping data) {
+        if (data.get(returnTree.expression()) != BasicType.INT) {
+            throw new SemanticException(data.get(returnTree.expression()) + " is an invalid return type");
+        }
+        return NoOpVisitor.super.visit(returnTree, data);
     }
 }
