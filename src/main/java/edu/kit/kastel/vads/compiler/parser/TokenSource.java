@@ -10,6 +10,7 @@ import edu.kit.kastel.vads.compiler.lexer.Separator;
 import edu.kit.kastel.vads.compiler.lexer.Separator.SeparatorType;
 import edu.kit.kastel.vads.compiler.lexer.Token;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -34,28 +35,31 @@ public class TokenSource {
         return this.tokens.get(this.idx);
     }
 
-    public Keyword expectKeyword(KeywordType type) {
+    public Keyword expectKeyword(KeywordType... type) {
         Token token = peek();
-        if (!(token instanceof Keyword kw) || kw.type() != type) {
-            throw new ParseException("expected keyword '" + type + "' but got " + token);
+        List<KeywordType> typeList = List.of(type);
+        if (!(token instanceof Keyword kw) || !typeList.contains(kw.type())) {
+            throw new ParseException("expected keyword '" + Arrays.toString(type) + "' but got " + token);
         }
         this.idx++;
         return kw;
     }
 
-    public Separator expectSeparator(SeparatorType type) {
+    public Separator expectSeparator(SeparatorType... type) {
         Token token = peek();
-        if (!(token instanceof Separator sep) || sep.type() != type) {
-            throw new ParseException("expected separator '" + type + "' but got " + token);
+        List<SeparatorType> typeList = List.of(type);
+        if (!(token instanceof Separator sep) || !typeList.contains(sep.type())) {
+            throw new ParseException("expected separator '" + Arrays.toString(type) + "' but got " + token);
         }
         this.idx++;
         return sep;
     }
 
-    public Operator expectOperator(OperatorType type) {
+    public Operator expectOperator(OperatorType... type) {
         Token token = peek();
-        if (!(token instanceof Operator op) || op.type() != type) {
-            throw new ParseException("expected operator '" + type + "' but got " + token);
+        List<OperatorType> typeList = List.of(type);
+        if (!(token instanceof Operator op) || !typeList.contains(op.type())) {
+            throw new ParseException("expected operator '" + Arrays.toString(type) + "' but got " + token);
         }
         this.idx++;
         return op;
