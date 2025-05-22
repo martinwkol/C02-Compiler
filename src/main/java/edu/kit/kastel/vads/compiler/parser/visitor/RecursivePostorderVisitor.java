@@ -96,9 +96,9 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
     @Override
     public R visit(IfTree ifTree, T data) {
         R r = ifTree.condition().accept(this, data);
-        r = ifTree.conditionTrue().accept(this, accumulate(data, r));
-        if (ifTree.conditionFalse() != null) {
-            r = ifTree.conditionFalse().accept(this, accumulate(data, r));
+        r = ifTree.caseTrue().accept(this, accumulate(data, r));
+        if (ifTree.caseFalse() != null) {
+            r = ifTree.caseFalse().accept(this, accumulate(data, r));
         }
         r = this.visitor.visit(ifTree, accumulate(data, r));
         return r;

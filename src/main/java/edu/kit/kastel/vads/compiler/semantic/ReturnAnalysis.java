@@ -4,9 +4,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /// Checks that functions return.
@@ -47,9 +45,9 @@ class ReturnAnalysis implements NoOpVisitor<ReturnAnalysis.ReturnState> {
 
     @Override
     public Unit visit(IfTree ifTree, ReturnState data) {
-        if (ifTree.conditionFalse() != null
-                && data.doesReturn(ifTree.conditionTrue())
-                && data.doesReturn(ifTree.conditionFalse())) {
+        if (ifTree.caseFalse() != null
+                && data.doesReturn(ifTree.caseTrue())
+                && data.doesReturn(ifTree.caseFalse())) {
             data.setReturns(ifTree);
         }
         return NoOpVisitor.super.visit(ifTree, data);

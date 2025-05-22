@@ -5,13 +5,13 @@ import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 import org.jspecify.annotations.Nullable;
 
-public record IfTree(ExpressionTree condition, StatementTree conditionTrue, @Nullable StatementTree conditionFalse, Position start) implements StatementTree {
+public record IfTree(ExpressionTree condition, StatementTree caseTrue, @Nullable StatementTree caseFalse, Position start) implements StatementTree {
     @Override
     public Span span() {
-        if (conditionFalse != null) {
-            return new Span.SimpleSpan(start, conditionFalse.span().end());
+        if (caseFalse != null) {
+            return new Span.SimpleSpan(start, caseFalse.span().end());
         }
-        return new Span.SimpleSpan(start, conditionTrue.span().end());
+        return new Span.SimpleSpan(start, caseTrue.span().end());
     }
 
     @Override
