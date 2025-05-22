@@ -51,7 +51,7 @@ public class Parser {
     private BlockTree parseBlock() {
         Separator bodyOpen = this.tokenSource.expectSeparator(SeparatorType.BRACE_OPEN);
         List<StatementTree> statements = new ArrayList<>();
-        while (!(this.tokenSource.peek() instanceof Separator sep && sep.type() == SeparatorType.BRACE_CLOSE)) {
+        while (!this.tokenSource.peek().isSeparator(SeparatorType.BRACE_CLOSE)) {
             statements.add(parseStatement());
         }
         Separator bodyClose = this.tokenSource.expectSeparator(SeparatorType.BRACE_CLOSE);
@@ -260,51 +260,52 @@ public class Parser {
 
     private ExpressionTree parseDisEquality() {
         ExpressionTree lhs = parseIntegerComparison();
-        while (this.tokenSource.peek() instanceof Operator(var type, _)
-                && (type == OperatorType.EQUALITY || type == OperatorType.DISEQUALITY)) {
+        while (this.tokenSource.peek().isOperator(OperatorType.EQUALITY, OperatorType.DISEQUALITY)) {
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseIntegerComparison(), type);
+            lhs = new BinaryOperationTree(lhs, parseIntegerComparison(), ((Operator)this.tokenSource.peek()).type());
         }
         return lhs;
     }
 
     private ExpressionTree parseIntegerComparison() {
         ExpressionTree lhs = parseShift();
-        while (this.tokenSource.peek() instanceof Operator(var type, _)
-                && (type == OperatorType.SMALLER || type == OperatorType.SMALLER_EQUAL
-                    || type == OperatorType.BIGGER || type == OperatorType.BIGGER_EQUAL)) {
+        while (this.tokenSource.peek().isOperator(
+                OperatorType.SMALLER, OperatorType.SMALLER_EQUAL,
+                OperatorType.BIGGER, OperatorType.BIGGER_EQUAL
+        )) {
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseShift(), type);
+            lhs = new BinaryOperationTree(lhs, parseShift(), ((Operator)this.tokenSource.peek()).type());
         }
         return lhs;
     }
 
     private ExpressionTree parseShift() {
         ExpressionTree lhs = parsePlusMinus();
-        while (this.tokenSource.peek() instanceof Operator(var type, _)
-                && (type == OperatorType.SHIFT_LEFT || type == OperatorType.SHIFT_RIGHT)) {
+        while (this.tokenSource.peek().isOperator(
+                OperatorType.SHIFT_LEFT, OperatorType.SHIFT_RIGHT
+        )) {
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parsePlusMinus(), type);
+            lhs = new BinaryOperationTree(lhs, parsePlusMinus(), ((Operator)this.tokenSource.peek()).type());
         }
         return lhs;
     }
 
     private ExpressionTree parsePlusMinus() {
         ExpressionTree lhs = parseMulDivMod();
-        while (this.tokenSource.peek() instanceof Operator(var type, _)
-                && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
+        while (this.tokenSource.peek().isOperator(OperatorType.PLUS, OperatorType.MINUS)) {
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseMulDivMod(), type);
+            lhs = new BinaryOperationTree(lhs, parseMulDivMod(), ((Operator)this.tokenSource.peek()).type());
         }
         return lhs;
     }
 
     private ExpressionTree parseMulDivMod() {
         ExpressionTree lhs = parseFactor();
-        while (this.tokenSource.peek() instanceof Operator(var type, _)
-                && (type == OperatorType.MUL || type == OperatorType.DIV || type == OperatorType.MOD)) {
+        while (this.tokenSource.peek().isOperator(
+                OperatorType.MUL, OperatorType.DIV, OperatorType.MOD
+        )) {
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseFactor(), type);
+            lhs = new BinaryOperationTree(lhs, parseFactor(), ((Operator)this.tokenSource.peek()).type());
         }
         return lhs;
     }
