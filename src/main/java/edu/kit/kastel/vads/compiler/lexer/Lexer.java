@@ -41,7 +41,18 @@ public class Lexer {
             case '*' -> singleOrAssign(OperatorType.MUL, OperatorType.ASSIGN_MUL);
             case '/' -> singleOrAssign(OperatorType.DIV, OperatorType.ASSIGN_DIV);
             case '%' -> singleOrAssign(OperatorType.MOD, OperatorType.ASSIGN_MOD);
-            case '=' -> new Operator(OperatorType.ASSIGN, buildSpan(1));
+            case '&' -> singleDoubleAssign(OperatorType.BITWISE_AND, OperatorType.ASSIGN_BITWISE_AND,
+                            OperatorType.LOGICAL_AND, null);
+            case '|' -> singleDoubleAssign(OperatorType.BITWISE_OR, OperatorType.ASSIGN_BITWISE_OR,
+                            OperatorType.LOGICAL_OR, null);
+            case '^' -> singleOrAssign(OperatorType.BITWISE_XOR, OperatorType.ASSIGN_BITWISE_XOR);
+            case '~' -> new Operator(OperatorType.BITWISE_NOT, buildSpan(1));
+            case '<' -> singleDoubleAssign(OperatorType.SMALLER, OperatorType.SMALLER_EQUAL, 
+                            OperatorType.SHIFT_LEFT, OperatorType.ASSIGN_SHIFT_LEFT);
+            case '>' -> singleDoubleAssign(OperatorType.BIGGER, OperatorType.BIGGER_EQUAL,
+                            OperatorType.SHIFT_RIGHT, OperatorType.ASSIGN_SHIFT_RIGHT);
+            case '!' -> singleOrAssign(OperatorType.LOGICAL_NOT, OperatorType.DISEQUALITY);
+            case '=' -> singleOrAssign(OperatorType.ASSIGN, OperatorType.EQUALITY);
             case '?' -> new Operator(OperatorType.QUESTION, buildSpan(1));
             case ':' -> new Operator(OperatorType.COLON, buildSpan(1));
             default -> {
@@ -193,6 +204,21 @@ public class Lexer {
     private Token singleOrAssign(OperatorType single, OperatorType assign) {
         if (hasMore(1) && peek(1) == '=') {
             return new Operator(assign, buildSpan(2));
+        }
+        return new Operator(single, buildSpan(1));
+    }
+
+    private Token singleDoubleAssign(OperatorType single, @Nullable OperatorType assignSingle, OperatorType doubleOp, @Nullable OperatorType assignDouble) {
+        if (hasMore(1)) {
+            if (assignSingle != null && peek(1) == '=') {
+                return new Operator(assignSingle, buildSpan(2));
+            }
+            if (peek(1) == peek(0)) {
+                if (assignDouble != null && hasMore(2) && peek(2) == '=') {
+                    return new Operator(assignDouble, buildSpan(3));
+                }
+                return new Operator(doubleOp, buildSpan(2));
+            }
         }
         return new Operator(single, buildSpan(1));
     }
