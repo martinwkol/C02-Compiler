@@ -35,7 +35,9 @@ public interface Visitor<T, R> {
 
     R visit(TernaryConditionTree ternaryConditionTree, T data);
 
-    R visit(LiteralTree literalTree, T data);
+    R visit(IntLiteralTree intLiteralTree, T data);
+
+    R visit(BoolLiteralTree boolLiteralTree, T data);
 
     R visit(LValueIdentTree lValueIdentTree, T data);
 

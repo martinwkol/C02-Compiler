@@ -84,7 +84,12 @@ public interface NoOpVisitor<T> extends Visitor<T, Unit> {
     }
 
     @Override
-    default Unit visit(LiteralTree literalTree, T data) {
+    default Unit visit(IntLiteralTree intLiteralTree, T data) {
+        return Unit.INSTANCE;
+    }
+
+    @Override
+    default Unit visit(BoolLiteralTree boolLiteralTree, T data) {
         return Unit.INSTANCE;
     }
 

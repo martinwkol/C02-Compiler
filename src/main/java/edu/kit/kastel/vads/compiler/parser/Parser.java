@@ -335,7 +335,12 @@ public class Parser {
             }
             case NumberLiteral(String value, int base, Span span) -> {
                 this.tokenSource.consume();
-                yield new LiteralTree(value, base, span);
+                yield new IntLiteralTree(value, base, span);
+            }
+            case Keyword(KeywordType type, Span span) when
+                    type == KeywordType.FALSE || type == KeywordType.TRUE -> {
+                this.tokenSource.consume();
+                yield new BoolLiteralTree(type == KeywordType.TRUE, span);
             }
             case Token t -> throw new ParseException("invalid factor " + t);
         };

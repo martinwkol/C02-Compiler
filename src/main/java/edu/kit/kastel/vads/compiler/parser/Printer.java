@@ -58,7 +58,8 @@ public class Printer {
             }
             case TypeTree(var type, _) -> print(type.asString());
             case BinaryOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
-            case LiteralTree(var value, _, _) -> this.builder.append(value);
+            case IntLiteralTree(var value, _, _) -> this.builder.append(value);
+            case BoolLiteralTree(boolean value, _) -> this.builder.append(value);
             case NegateTree(ExpressionTree expression, Operator.OperatorType negationOp, _) -> {
                 this.builder.append(negationOp);
                 print("(");
