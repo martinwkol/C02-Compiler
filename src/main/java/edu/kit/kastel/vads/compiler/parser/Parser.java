@@ -95,14 +95,19 @@ public class Parser {
     }
 
     private StatementTree parseDeclaration() {
-        Keyword type = this.tokenSource.expectKeyword(KeywordType.INT);
+        Keyword keyword = this.tokenSource.expectKeyword(KeywordType.INT, KeywordType.BOOL);
         Identifier ident = this.tokenSource.expectIdentifier();
         ExpressionTree expr = null;
         if (this.tokenSource.peek().isOperator(OperatorType.ASSIGN)) {
             this.tokenSource.expectOperator(OperatorType.ASSIGN);
             expr = parseExpression();
         }
-        return new DeclarationTree(new TypeTree(BasicType.INT, type.span()), name(ident), expr);
+        BasicType basicType = switch (keyword.type()) {
+            case KeywordType.INT -> BasicType.INT;
+            case KeywordType.BOOL -> BasicType.BOOL;
+            default -> throw new ParseException("Keyword " + keyword.type() + " does not represent a type");
+        };
+        return new DeclarationTree(new TypeTree(basicType, keyword.span()), name(ident), expr);
     }
 
     private StatementTree parseSimple() {
