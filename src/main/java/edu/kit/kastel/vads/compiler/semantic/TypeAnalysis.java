@@ -76,6 +76,12 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
     }
 
     @Override
+    public Unit visit(LiteralTree literalTree, TypeMapping data) {
+        data.put(literalTree, BasicType.INT);
+        return NoOpVisitor.super.visit(literalTree, data);
+    }
+
+    @Override
     public Unit visit(BinaryOperationTree binaryOperationTree, TypeMapping data) {
         Type left = data.get(binaryOperationTree.lhs());
         Type right = data.get(binaryOperationTree.rhs());
@@ -90,15 +96,47 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
         } else if (left == BasicType.INT) {
             switch (binaryOperationTree.operatorType()) {
                 case EQUALITY, DISEQUALITY, SMALLER, SMALLER_EQUAL, BIGGER, BIGGER_EQUAL ->
-                    data.put(binaryOperationTree, BasicType.BOOL);
+                        data.put(binaryOperationTree, BasicType.BOOL);
                 case PLUS, MINUS, MUL, DIV, MOD, BITWISE_AND, BITWISE_OR, BITWISE_XOR, SHIFT_LEFT, SHIFT_RIGHT ->
-                    data.put(binaryOperationTree, BasicType.INT);
+                        data.put(binaryOperationTree, BasicType.INT);
                 default -> throw new SemanticException("Operator " + binaryOperationTree.operatorType() + " does not match (int, int)");
             }
         } else {
             throw new SemanticException("Unsupported type " + left);
         }
         return NoOpVisitor.super.visit(binaryOperationTree, data);
+    }
+
+    @Override
+    public Unit visit(NegateTree negateTree, TypeMapping data) {
+        Type type = data.get(negateTree.expression());
+        if (type == BasicType.BOOL) {
+            if (negateTree.operator() == Operator.OperatorType.LOGICAL_NOT) {
+                data.put(negateTree, BasicType.BOOL);
+            } else {
+                throw new SemanticException(negateTree.operator() + " does not match boolean");
+            }
+        } else if (type == BasicType.INT) {
+            switch (negateTree.operator()) {
+                case MINUS, BITWISE_NOT -> data.put(negateTree, BasicType.INT);
+                default -> throw new SemanticException(negateTree.operator() + " does not match integer");
+            }
+        }
+        return NoOpVisitor.super.visit(negateTree, data);
+    }
+
+    @Override
+    public Unit visit(TernaryConditionTree ternaryConditionTree, TypeMapping data) {
+        if (data.get(ternaryConditionTree.condition()) != BasicType.BOOL) {
+            throw new SemanticException("Non-boolean expression given as condition for ternary conditional");
+        }
+        Type caseTrue = data.get(ternaryConditionTree.caseTrue());
+        Type caseFalse = data.get(ternaryConditionTree.caseFalse());
+        if (caseTrue != caseFalse) {
+            throw new SemanticException(caseTrue + " and " + caseFalse + " do not match");
+        }
+        data.put(ternaryConditionTree, caseTrue);
+        return NoOpVisitor.super.visit(ternaryConditionTree, data);
     }
 
     @Override
