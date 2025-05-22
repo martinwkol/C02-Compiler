@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 /// Checks that functions return.
-/// Currently only works for straight-line code.
 class ReturnAnalysis implements NoOpVisitor<ReturnAnalysis.ReturnState> {
 
     static class ReturnState {
