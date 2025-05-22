@@ -47,7 +47,7 @@ public class Lexer {
                             OperatorType.LOGICAL_OR, null);
             case '^' -> singleOrAssign(OperatorType.BITWISE_XOR, OperatorType.ASSIGN_BITWISE_XOR);
             case '~' -> new Operator(OperatorType.BITWISE_NOT, buildSpan(1));
-            case '<' -> singleDoubleAssign(OperatorType.SMALLER, OperatorType.SMALLER_EQUAL, 
+            case '<' -> singleDoubleAssign(OperatorType.SMALLER, OperatorType.SMALLER_EQUAL,
                             OperatorType.SHIFT_LEFT, OperatorType.ASSIGN_SHIFT_LEFT);
             case '>' -> singleDoubleAssign(OperatorType.BIGGER, OperatorType.BIGGER_EQUAL,
                             OperatorType.SHIFT_RIGHT, OperatorType.ASSIGN_SHIFT_RIGHT);
