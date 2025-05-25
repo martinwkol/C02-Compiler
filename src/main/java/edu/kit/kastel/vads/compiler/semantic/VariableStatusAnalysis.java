@@ -1,94 +1,124 @@
 package edu.kit.kastel.vads.compiler.semantic;
 
 import edu.kit.kastel.vads.compiler.lexer.Operator;
-import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
+import edu.kit.kastel.vads.compiler.parser.ast.*;
+import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
+import edu.kit.kastel.vads.compiler.util.Pair;
 import org.jspecify.annotations.Nullable;
 
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Stack;
 
 /// Checks that variables are
 /// - declared before assignment
 /// - not declared twice
 /// - not initialized twice
 /// - assigned before referenced
-class VariableStatusAnalysis implements NoOpVisitor<Namespace<VariableStatusAnalysis.VariableStatus>> {
+class VariableStatusAnalysis  {
 
-    @Override
-    public Unit visit(AssignmentTree assignmentTree, Namespace<VariableStatus> data) {
-        switch (assignmentTree.lValue()) {
-            case LValueIdentTree(var name) -> {
-                VariableStatus status = data.get(name);
-                if (assignmentTree.operator().type() == Operator.OperatorType.ASSIGN) {
-                    checkDeclared(name, status);
-                } else {
-                    checkInitialized(name, status);
-                }
-                if (status != VariableStatus.INITIALIZED) {
-                    // only update when needed, reassignment is totally fine
-                    updateStatus(data, VariableStatus.INITIALIZED, name);
-                }
-            }
+    static class VariableStatus {
+        private final LinkedHashSet<Name> declared;
+        private final LinkedHashSet<Name> initialized;
+        private final Stack<Pair<Integer, Integer>> blockStart;
+
+        public VariableStatus() {
+            declared = new LinkedHashSet<>();
+            initialized = new LinkedHashSet<>();
+            blockStart = new Stack<>();
         }
-        return NoOpVisitor.super.visit(assignmentTree, data);
-    }
 
-    private static void checkDeclared(NameTree name, @Nullable VariableStatus status) {
-        if (status == null) {
-            throw new SemanticException("Variable " + name + " must be declared before assignment");
+        public boolean declare(Name name) {
+            return declared.add(name);
         }
-    }
 
-    private static void checkInitialized(NameTree name, @Nullable VariableStatus status) {
-        if (status == null || status == VariableStatus.DECLARED) {
-            throw new SemanticException("Variable " + name + " must be initialized before use");
+        public boolean initialize(Name name) {
+            return initialized.add(name);
         }
-    }
 
-    private static void checkUndeclared(NameTree name, @Nullable VariableStatus status) {
-        if (status != null) {
-            throw new SemanticException("Variable " + name + " is already declared");
+        public boolean isDeclared(Name name) {
+            return declared.contains(name);
         }
-    }
 
-    @Override
-    public Unit visit(DeclarationTree declarationTree, Namespace<VariableStatus> data) {
-        checkUndeclared(declarationTree.name(), data.get(declarationTree.name()));
-        VariableStatus status = declarationTree.initializer() == null
-            ? VariableStatus.DECLARED
-            : VariableStatus.INITIALIZED;
-        updateStatus(data, status, declarationTree.name());
-        return NoOpVisitor.super.visit(declarationTree, data);
-    }
+        public boolean isInitialized(Name name) {
+            return initialized.contains(name);
+        }
 
-    private static void updateStatus(Namespace<VariableStatus> data, VariableStatus status, NameTree name) {
-        data.put(name, status, (existing, replacement) -> {
-            if (existing.ordinal() >= replacement.ordinal()) {
-                throw new SemanticException("variable is already " + existing + ". Cannot be " + replacement + " here.");
-            }
-            return replacement;
-        });
-    }
+        public void newBlock() {
+            blockStart.push(new Pair<>(declared.size(), initialized.size()));
+        }
 
-    @Override
-    public Unit visit(IdentExpressionTree identExpressionTree, Namespace<VariableStatus> data) {
-        VariableStatus status = data.get(identExpressionTree.name());
-        checkInitialized(identExpressionTree.name(), status);
-        return NoOpVisitor.super.visit(identExpressionTree, data);
-    }
+        public void endBlock() {
+            Pair<Integer, Integer> start = blockStart.pop();
+            while (declared.size() > start.first()) declared.removeLast();
+            while (initialized.size() > start.second()) initialized.removeLast();
+        }
+    };
 
-    enum VariableStatus {
-        DECLARED,
-        INITIALIZED;
+    static class PreorderVisitor implements NoOpVisitor<VariableStatus> {
+        @Override
+        public Unit visit(BlockTree blockTree, VariableStatus data) {
+            data.newBlock();
+            return NoOpVisitor.super.visit(blockTree, data);
+        }
 
         @Override
-        public String toString() {
-            return name().toLowerCase(Locale.ROOT);
+        public Unit visit(AssignmentTree assignmentTree, VariableStatus data) {
+            switch (assignmentTree.lValue()) {
+                case LValueIdentTree(var name) -> {
+                    if (assignmentTree.operator().type() == Operator.OperatorType.ASSIGN) {
+                        checkDeclared(name, data);
+                    } else {
+                        checkInitialized(name, data);
+                    }
+                    data.initialize(name.name());
+                }
+            }
+            return NoOpVisitor.super.visit(assignmentTree, data);
+        }
+
+        @Override
+        public Unit visit(DeclarationTree declarationTree, VariableStatus data) {
+            checkUndeclared(declarationTree.name(), data);
+            data.declare(declarationTree.name().name());
+            if (declarationTree.initializer() != null) {
+                data.initialize(declarationTree.name().name());
+            }
+            return NoOpVisitor.super.visit(declarationTree, data);
+        }
+
+        @Override
+        public Unit visit(IdentExpressionTree identExpressionTree, VariableStatus data) {
+            checkInitialized(identExpressionTree.name(), data);
+            return NoOpVisitor.super.visit(identExpressionTree, data);
+        }
+
+        private static void checkDeclared(NameTree name, VariableStatus data) {
+            if (!data.isDeclared(name.name())) {
+                throw new SemanticException("Variable " + name + " must be declared before assignment");
+            }
+        }
+
+        private static void checkInitialized(NameTree name, VariableStatus data) {
+            if (!data.isInitialized(name.name())) {
+                throw new SemanticException("Variable " + name + " must be initialized before use");
+            }
+        }
+
+        private static void checkUndeclared(NameTree name, VariableStatus data) {
+            if (!data.isDeclared(name.name())) {
+                throw new SemanticException("Variable " + name + " is already declared");
+            }
+        }
+    }
+
+    static class PostorderVisitor implements NoOpVisitor<VariableStatus> {
+        @Override
+        public Unit visit(BlockTree blockTree, VariableStatus data) {
+            data.endBlock();
+            return NoOpVisitor.super.visit(blockTree, data);
         }
     }
 }
