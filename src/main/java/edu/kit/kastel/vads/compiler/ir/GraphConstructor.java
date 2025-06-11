@@ -85,6 +85,14 @@ class GraphConstructor {
         return this.currentBlock;
     }
 
+    public void newBlock(Block... predecessors) {
+        Block nBlock = new Block(this.graph());
+        for (Node predecessor : predecessors) {
+            nBlock.addPredecessor(predecessor);
+        }
+        currentBlock = nBlock;
+    }
+
     public Phi newPhi() {
         // don't transform phi directly, it is not ready yet
         return new Phi(currentBlock());
