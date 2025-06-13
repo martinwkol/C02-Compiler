@@ -1,17 +1,6 @@
 package edu.kit.kastel.vads.compiler.ir;
 
-import edu.kit.kastel.vads.compiler.ir.node.AddNode;
-import edu.kit.kastel.vads.compiler.ir.node.Block;
-import edu.kit.kastel.vads.compiler.ir.node.ConstIntNode;
-import edu.kit.kastel.vads.compiler.ir.node.DivNode;
-import edu.kit.kastel.vads.compiler.ir.node.ModNode;
-import edu.kit.kastel.vads.compiler.ir.node.MulNode;
-import edu.kit.kastel.vads.compiler.ir.node.Node;
-import edu.kit.kastel.vads.compiler.ir.node.Phi;
-import edu.kit.kastel.vads.compiler.ir.node.ProjNode;
-import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
-import edu.kit.kastel.vads.compiler.ir.node.StartNode;
-import edu.kit.kastel.vads.compiler.ir.node.SubNode;
+import edu.kit.kastel.vads.compiler.ir.node.*;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 
@@ -63,6 +52,46 @@ class GraphConstructor {
         return this.optimizer.transform(new ModNode(currentBlock(), left, right, readCurrentSideEffect()));
     }
 
+    public Node newBitAnd(Node left, Node right) {
+        return this.optimizer.transform(new BitAndNode(currentBlock(), left, right));
+    }
+
+    public Node newBitOr(Node left, Node right) {
+        return this.optimizer.transform(new BitOrNode(currentBlock(), left, right));
+    }
+
+    public Node newBitXor(Node left, Node right) {
+        return this.optimizer.transform(new BitXorNode(currentBlock(), left, right));
+    }
+
+    public Node newEquals(Node left, Node right) {
+        return this.optimizer.transform(new CEqualsNode(currentBlock(), left, right));
+    }
+
+    public Node newUnequals(Node left, Node right) {
+        return this.optimizer.transform(new CUnequalsNode(currentBlock(), left, right));
+    }
+
+    public Node newSmaller(Node left, Node right) {
+        return this.optimizer.transform(new CSmallerNode(currentBlock(), left, right));
+    }
+
+    public Node newSmallerEq(Node left, Node right) {
+        return this.optimizer.transform(new CSmallerEqNode(currentBlock(), left, right));
+    }
+
+    public Node newBigger(Node left, Node right) {
+        return this.optimizer.transform(new CBiggerNode(currentBlock(), left, right));
+    }
+
+    public Node newBiggerEq(Node left, Node right) {
+        return this.optimizer.transform(new CBiggerEqNode(currentBlock(), left, right));
+    }
+
+    public Node newJump(Block target) {
+        return new JumpNode(currentBlock(), target);
+    }
+
     public Node newReturn(Node result) {
         return new ReturnNode(currentBlock(), readCurrentSideEffect(), result);
     }
@@ -71,6 +100,10 @@ class GraphConstructor {
         // always move const into start block, this allows better deduplication
         // and resultingly in better value numbering
         return this.optimizer.transform(new ConstIntNode(this.graph.startBlock(), value));
+    }
+
+    public Node newConstBool(boolean value) {
+        return this.optimizer.transform(new ConstBoolNode(this.graph.startBlock(), value));
     }
 
     public Node newSideEffectProj(Node node) {
