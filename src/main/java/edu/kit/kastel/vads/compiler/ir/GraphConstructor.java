@@ -88,10 +88,6 @@ class GraphConstructor {
         return this.optimizer.transform(new CBiggerEqNode(currentBlock(), left, right));
     }
 
-    public Node newJump(Block target) {
-        return new JumpNode(currentBlock(), target);
-    }
-
     public Node newReturn(Node result) {
         return this.currentBlock.setReturnExitNode(readCurrentSideEffect(), result);
     }
@@ -118,12 +114,12 @@ class GraphConstructor {
         return this.currentBlock;
     }
 
-    public void newBlock(Block... predecessors) {
-        Block nBlock = new Block(this.graph());
-        for (Node predecessor : predecessors) {
-            nBlock.addPredecessor(predecessor);
-        }
-        currentBlock = nBlock;
+    public void setCurrentBlock(Block block) {
+        this.currentBlock = block;
+    }
+
+    public Block newBlock() {
+        return new Block(this.graph());
     }
 
     public Phi newPhi() {

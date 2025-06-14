@@ -7,21 +7,7 @@ import edu.kit.kastel.vads.compiler.ir.node.Node;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
-import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
-import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.IntLiteralTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NegateTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
-import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
-import edu.kit.kastel.vads.compiler.parser.ast.Tree;
-import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
+import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
@@ -123,6 +109,52 @@ public class SsaTranslation {
             };
             popSpan();
             return Optional.of(res);
+        }
+
+        @Override
+        public Optional<Node> visit(IfTree ifTree, SsaTranslation data) {
+            pushSpan(ifTree);
+
+            Node condition = ifTree.condition().accept(this, data).orElseThrow();
+
+            Block beforeIf = data.constructor.currentBlock();
+            Block trueEntry = data.constructor.newBlock();
+            Block falseEntry = data.constructor.newBlock();
+
+            beforeIf.setIfExitNode(condition, trueEntry, falseEntry);
+            data.constructor.sealBlock(trueEntry);
+            data.constructor.sealBlock(falseEntry);
+
+            data.constructor.setCurrentBlock(trueEntry);
+            ifTree.caseTrue().accept(this, data);
+            Block trueExit = data.constructor.currentBlock();
+
+            Block falseExit = falseEntry;
+            if (ifTree.caseFalse() != null) {
+                data.constructor.setCurrentBlock(falseEntry);
+                ifTree.caseFalse().accept(this, data);
+                falseExit = data.constructor.currentBlock();
+            }
+
+            Block ifExit = data.constructor.newBlock();
+            trueExit.setJumpExitNode(ifExit);
+            falseExit.setJumpExitNode(ifExit);
+            data.constructor.sealBlock(ifExit);
+            data.constructor.setCurrentBlock(ifExit);
+
+            popSpan();
+            return NOT_AN_EXPRESSION;
+        }
+
+        @Override
+        public Optional<Node> visit(WhileTree whileTree, SsaTranslation data) {
+            pushSpan(whileTree);
+            Block beforeWhile = data.currentBlock();
+            Node condition = whileTree.condition().accept(this, data).orElseThrow();
+            Block whileBlock = data.constructor.newBlock(beforeWhile);
+
+            popSpan();
+            return NOT_AN_EXPRESSION;
         }
 
         @Override
