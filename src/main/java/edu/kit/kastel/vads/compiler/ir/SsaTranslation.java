@@ -185,6 +185,52 @@ public class SsaTranslation {
         }
 
         @Override
+        public Optional<Node> visit(ForTree forTree, SsaTranslation data) {
+            pushSpan(forTree);
+
+            if (forTree.initializer() != null) {
+                forTree.initializer().accept(this, data);
+            }
+
+            Block beforeLoop = data.constructor.currentBlock();
+            Block loopHeader = data.constructor.newBlock();
+            Block bodyEntry = data.constructor.newBlock();
+            Block bodyExit = data.constructor.newBlock();
+            Block loopExit = data.constructor.newBlock();
+
+            beforeLoop.setJumpExitNode(loopHeader);
+
+            loopStack.push(new LoopInfo(bodyExit, loopExit));
+            data.constructor.setCurrentBlock(loopHeader);
+            Node condition = forTree.condition().accept(this, data).orElseThrow();
+            loopHeader.setIfExitNode(condition, bodyEntry, loopExit);
+            data.constructor.sealBlock(bodyEntry);
+
+            data.constructor.setCurrentBlock(bodyEntry);
+            forTree.body().accept(this, data);
+            Block preExitBody = data.constructor.currentBlock();
+            // might already be set if block ends with break or continue
+            if (preExitBody.exitNode() == null) {
+                preExitBody.setJumpExitNode(bodyExit);
+            }
+
+            data.constructor.setCurrentBlock(bodyExit);
+            if (forTree.step() != null) {
+                forTree.step().accept(this, data);
+            }
+            bodyExit.setJumpExitNode(loopHeader);
+            loopStack.pop();
+
+            data.constructor.sealBlock(bodyExit);
+            data.constructor.sealBlock(loopHeader);
+            data.constructor.sealBlock(loopExit);
+            data.constructor.setCurrentBlock(loopExit);
+
+            popSpan();
+            return NOT_AN_EXPRESSION;
+        }
+
+        @Override
         public Optional<Node> visit(BlockTree blockTree, SsaTranslation data) {
             pushSpan(blockTree);
             for (StatementTree statement : blockTree.statements()) {
