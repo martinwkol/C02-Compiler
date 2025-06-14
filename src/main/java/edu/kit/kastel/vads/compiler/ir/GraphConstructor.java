@@ -127,6 +127,14 @@ class GraphConstructor {
         return new Phi(currentBlock());
     }
 
+    public Node newPhiWithOperands(Node... operands) {
+        Phi phi = newPhi();
+        for (Node operand : operands) {
+            phi.appendOperand(operand);
+        }
+        return tryRemoveTrivialPhi(phi);
+    }
+
     public IrGraph graph() {
         return this.graph;
     }

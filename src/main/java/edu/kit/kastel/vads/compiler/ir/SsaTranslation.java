@@ -150,6 +150,21 @@ public class SsaTranslation {
         }
 
         @Override
+        public Optional<Node> visit(TernaryConditionTree ternaryConditionTree, SsaTranslation data) {
+            pushSpan(ternaryConditionTree);
+
+            Optional<Node> result = Optional.of(ternaryCondition(
+                ternaryConditionTree.condition(),
+                ternaryConditionTree.caseTrue(),
+                ternaryConditionTree.caseFalse(),
+                data
+            ));
+
+            popSpan();
+            return result;
+        }
+
+        @Override
         public Optional<Node> visit(WhileTree whileTree, SsaTranslation data) {
             pushSpan(whileTree);
 
@@ -343,6 +358,39 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(TypeTree typeTree, SsaTranslation data) {
             throw new UnsupportedOperationException();
+        }
+
+        private Node ternaryCondition(
+                ExpressionTree condition,
+                ExpressionTree caseTrue,
+                ExpressionTree caseFalse,
+                SsaTranslation data
+        ) {
+            Node conditionNode = condition.accept(this, data).orElseThrow();
+
+            Block beforeIf = data.constructor.currentBlock();
+            Block trueEntry = data.constructor.newBlock();
+            Block falseEntry = data.constructor.newBlock();
+
+            beforeIf.setIfExitNode(conditionNode, trueEntry, falseEntry);
+            data.constructor.sealBlock(trueEntry);
+            data.constructor.sealBlock(falseEntry);
+
+            data.constructor.setCurrentBlock(trueEntry);
+            Node resultTrue = caseTrue.accept(this, data).orElseThrow();
+            Block trueExit = data.constructor.currentBlock();
+
+            data.constructor.setCurrentBlock(falseEntry);
+            Node resultFalse = caseFalse.accept(this, data).orElseThrow();
+            Block falseExit = data.constructor.currentBlock();
+
+            Block ifExit = data.constructor.newBlock();
+            trueExit.setJumpExitNode(ifExit);
+            falseExit.setJumpExitNode(ifExit);
+            data.constructor.sealBlock(ifExit);
+            data.constructor.setCurrentBlock(ifExit);
+
+            return data.constructor.newPhiWithOperands(resultTrue, resultFalse);
         }
 
         private Node projResultDivMod(SsaTranslation data, Node divMod) {
