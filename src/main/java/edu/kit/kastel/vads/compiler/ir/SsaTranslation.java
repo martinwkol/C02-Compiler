@@ -7,10 +7,12 @@ import edu.kit.kastel.vads.compiler.ir.node.Node;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
+import edu.kit.kastel.vads.compiler.ir.util.LoopInfo;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
+import java.net.http.HttpResponse;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
@@ -56,6 +58,7 @@ public class SsaTranslation {
         private static final Optional<Node> NOT_AN_EXPRESSION = Optional.empty();
 
         private final Deque<DebugInfo> debugStack = new ArrayDeque<>();
+        private final Deque<LoopInfo> loopStack = new ArrayDeque<>();
 
         private void pushSpan(Tree tree) {
             this.debugStack.push(DebugInfoHelper.getDebugInfo());
@@ -149,9 +152,33 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(WhileTree whileTree, SsaTranslation data) {
             pushSpan(whileTree);
-            Block beforeWhile = data.currentBlock();
+
+            Block beforeWhile = data.constructor.currentBlock();
+            Block whileHeader = data.constructor.newBlock();
+            Block bodyEntry = data.constructor.newBlock();
+            Block loopExit = data.constructor.newBlock();
+
+            // cannot seal while header yet
+            beforeWhile.setJumpExitNode(whileHeader);
+
+            loopStack.push(new LoopInfo(whileHeader, loopExit));
+            data.constructor.setCurrentBlock(whileHeader);
             Node condition = whileTree.condition().accept(this, data).orElseThrow();
-            Block whileBlock = data.constructor.newBlock(beforeWhile);
+            whileHeader.setIfExitNode(condition, bodyEntry, loopExit);
+            data.constructor.sealBlock(bodyEntry);
+
+            data.constructor.setCurrentBlock(bodyEntry);
+            whileTree.body().accept(this, data);
+            Block bodyExit = data.constructor.currentBlock();
+            // might already be set if block ends with break or continue
+            if (bodyExit.exitNode() == null) {
+                bodyExit.setJumpExitNode(whileHeader);
+            }
+            loopStack.pop();
+
+            data.constructor.sealBlock(whileHeader);
+            data.constructor.sealBlock(loopExit);
+            data.constructor.setCurrentBlock(loopExit);
 
             popSpan();
             return NOT_AN_EXPRESSION;
