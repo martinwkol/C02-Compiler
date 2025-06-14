@@ -4,24 +4,33 @@ import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import org.jspecify.annotations.Nullable;
 
 public final class Block extends Node {
-    private @Nullable Node exitNode;
+    private @Nullable ExitNode exitNode;
 
     public Block(IrGraph graph) {
         super(graph);
         this.exitNode = null;
     }
 
-    public Block(IrGraph graph, @Nullable Node exitNode) {
-        super(graph);
-        this.exitNode = exitNode;
-    }
-
     @Nullable public Node exitNode() {
         return exitNode;
     }
 
-    public void setExitNode(Node exitNode) {
+    public void setJumpExitNode(Block targetBlock) {
+        setExitNode(new JumpNode(this, targetBlock));
+    }
+
+    public void setIfExitNode(Node condition, Block trueEntry, Block falseEntry) {
+        setExitNode(new IfNode(this, condition, trueEntry, falseEntry));
+    }
+
+    public void setReturnExitNode(Node sideEffect, Node result) {
+        setExitNode(new ReturnNode(this, sideEffect, result));
+    }
+
+    private void setExitNode(ExitNode exitNode) {
+        if (this.exitNode != null) throw new RuntimeException("Attempted to override already existing exitNode");
         this.exitNode = exitNode;
+        this.exitNode.updateBlockPredecessors();
     }
 
 }

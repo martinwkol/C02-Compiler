@@ -9,8 +9,8 @@ import java.util.List;
 
 /// The base class for all nodes.
 public sealed abstract class Node permits
-        BinaryOperationNode, BitNegationNode, Block, ConstIntNode, ConstBoolNode, Phi, ProjNode,
-        JumpNode, IfNode, TernaryConNode, ReturnNode, StartNode
+        BinaryOperationNode, ExitNode, BitNegationNode, Block, ConstIntNode, ConstBoolNode,
+        Phi, ProjNode, JumpNode, IfNode, TernaryConNode, StartNode
 {
     private final IrGraph graph;
     private final Block block;

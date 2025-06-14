@@ -1,20 +1,26 @@
 package edu.kit.kastel.vads.compiler.ir.node;
 
-public final class IfNode extends Node {
-    private final Block trueBlock;
-    private final Block falseBlock;
+public final class IfNode extends ExitNode {
+    private final Block trueEntry;
+    private final Block falseEntry;
 
-    public IfNode(Block block, Node condition, Block trueBlock, Block falseBlock) {
+    public IfNode(Block block, Node condition, Block trueEntry, Block falseEntry) {
         super(block, condition);
-        this.trueBlock = trueBlock;
-        this.falseBlock = falseBlock;
+        this.trueEntry = trueEntry;
+        this.falseEntry = falseEntry;
     }
 
-    public Block trueBlock() {
-        return trueBlock;
+    public Block trueEntry() {
+        return trueEntry;
     }
 
-    public Block falseBlock() {
-        return falseBlock;
+    public Block falseEntry() {
+        return falseEntry;
+    }
+
+    @Override
+    public void updateBlockPredecessors() {
+        this.trueEntry.addPredecessor(this.block());
+        this.falseEntry.addPredecessor(this.block());
     }
 }
