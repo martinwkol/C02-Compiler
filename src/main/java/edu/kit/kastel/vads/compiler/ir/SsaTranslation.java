@@ -205,8 +205,6 @@ public class SsaTranslation {
             pushSpan(returnTree);
             Node node = returnTree.expression().accept(this, data).orElseThrow();
             Node ret = data.constructor.newReturn(node);
-            data.constructor.currentBlock().setExitNode(ret);
-            data.constructor.graph().endBlock().addPredecessor(ret);
             popSpan();
             return NOT_AN_EXPRESSION;
         }

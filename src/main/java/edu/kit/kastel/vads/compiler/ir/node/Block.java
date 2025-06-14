@@ -15,22 +15,23 @@ public final class Block extends Node {
         return exitNode;
     }
 
-    public void setJumpExitNode(Block targetBlock) {
-        setExitNode(new JumpNode(this, targetBlock));
+    public ExitNode setJumpExitNode(Block targetBlock) {
+        return setExitNode(new JumpNode(this, targetBlock));
     }
 
-    public void setIfExitNode(Node condition, Block trueEntry, Block falseEntry) {
-        setExitNode(new IfNode(this, condition, trueEntry, falseEntry));
+    public ExitNode setIfExitNode(Node condition, Block trueEntry, Block falseEntry) {
+        return setExitNode(new IfNode(this, condition, trueEntry, falseEntry));
     }
 
-    public void setReturnExitNode(Node sideEffect, Node result) {
-        setExitNode(new ReturnNode(this, sideEffect, result));
+    public ExitNode setReturnExitNode(Node sideEffect, Node result) {
+        return setExitNode(new ReturnNode(this, sideEffect, result));
     }
 
-    private void setExitNode(ExitNode exitNode) {
+    private ExitNode setExitNode(ExitNode exitNode) {
         if (this.exitNode != null) throw new RuntimeException("Attempted to override already existing exitNode");
         this.exitNode = exitNode;
         this.exitNode.updateBlockPredecessors();
+        return exitNode;
     }
 
 }
