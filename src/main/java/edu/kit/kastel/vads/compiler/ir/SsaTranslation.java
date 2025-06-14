@@ -231,6 +231,32 @@ public class SsaTranslation {
         }
 
         @Override
+        public Optional<Node> visit(BreakTree breakTree, SsaTranslation data) {
+            pushSpan(breakTree);
+
+            if (loopStack.isEmpty()) {
+                throw new RuntimeException("break statement outside of loop");
+            }
+            data.constructor.currentBlock().setJumpExitNode(loopStack.getLast().loopExit());
+
+            popSpan();
+            return NOT_AN_EXPRESSION;
+        }
+
+        @Override
+        public Optional<Node> visit(ContinueTree continueTree, SsaTranslation data) {
+            pushSpan(continueTree);
+
+            if (loopStack.isEmpty()) {
+                throw new RuntimeException("continue statement outside of loop");
+            }
+            data.constructor.currentBlock().setJumpExitNode(loopStack.getLast().bodyExit());
+
+            popSpan();
+            return NOT_AN_EXPRESSION;
+        }
+
+        @Override
         public Optional<Node> visit(BlockTree blockTree, SsaTranslation data) {
             pushSpan(blockTree);
             for (StatementTree statement : blockTree.statements()) {
