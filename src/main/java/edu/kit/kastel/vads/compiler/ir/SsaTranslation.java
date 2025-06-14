@@ -315,6 +315,14 @@ public class SsaTranslation {
         }
 
         @Override
+        public Optional<Node> visit(BoolLiteralTree boolLiteralTree, SsaTranslation data) {
+            pushSpan(boolLiteralTree);
+            Node node = data.constructor.newConstBool(boolLiteralTree.value());
+            popSpan();
+            return Optional.of(node);
+        }
+
+        @Override
         public Optional<Node> visit(IntLiteralTree intLiteralTree, SsaTranslation data) {
             pushSpan(intLiteralTree);
             Node node = data.constructor.newConstInt((int) intLiteralTree.parseValue().orElseThrow());
