@@ -76,6 +76,12 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
     }
 
     @Override
+    public Unit visit(IdentExpressionTree identExpressionTree, TypeMapping data) {
+        data.put(identExpressionTree, data.get(identExpressionTree.name().name()));
+        return NoOpVisitor.super.visit(identExpressionTree, data);
+    }
+
+    @Override
     public Unit visit(IntLiteralTree intLiteralTree, TypeMapping data) {
         data.put(intLiteralTree, BasicType.INT);
         return NoOpVisitor.super.visit(intLiteralTree, data);
