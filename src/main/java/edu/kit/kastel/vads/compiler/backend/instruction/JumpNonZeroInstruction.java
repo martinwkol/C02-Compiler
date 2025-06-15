@@ -1,6 +1,7 @@
 package edu.kit.kastel.vads.compiler.backend.instruction;
 
 import edu.kit.kastel.vads.compiler.backend.register.Register;
+import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 import edu.kit.kastel.vads.compiler.ir.node.Block;
 
 public final class JumpNonZeroInstruction extends JumpInstruction {
@@ -12,7 +13,7 @@ public final class JumpNonZeroInstruction extends JumpInstruction {
         addUses(register);
     }
 
-    public Register register() {
-        return this.register;
+    public Register register(RegisterMapping registerMapping) {
+        return registerMapping.get(this.register);
     }
 }

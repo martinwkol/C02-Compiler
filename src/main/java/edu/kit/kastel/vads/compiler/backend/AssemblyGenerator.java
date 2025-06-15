@@ -80,6 +80,11 @@ public class AssemblyGenerator {
             case ConstIntInstruction constInt -> addConstInt(constInt);
             case ConstBoolInstruction constBool -> addConstBool(constBool);
 
+            case JumpAlwaysInstruction jump -> addJump(jump);
+            case JumpZeroInstruction jumpZero -> addJumpZero(jumpZero);
+            case JumpNonZeroInstruction jumpNonZero -> addJumpNonZero(jumpNonZero);
+
+
             case ReturnInstruction ret -> addReturnInstruction(ret);
             case MoveInstruction m -> move(m.getSource(registerMapping), m.getDestination(registerMapping));
             case LabelInstruction _ -> {}
@@ -157,6 +162,22 @@ public class AssemblyGenerator {
     private void addLogNegation(LogNegationInstruction logNegation) {
         Register destination = logNegation.getDestination(registerMapping);
         builder.append(String.format("subl $%d, %s\n", 1, destination));
+    }
+
+    private void addJump(JumpAlwaysInstruction jump) {
+        builder.append(String.format("jmp %s\n", jump.target()));
+    }
+
+    private void addJumpZero(JumpZeroInstruction jump) {
+        Register destination = jump.register(registerMapping);
+        builder.append(String.format("cmp $%d, %s\n", 0, destination.registerName()));
+        builder.append(String.format("jz %s\n", jump.target()));
+    }
+
+    private void addJumpNonZero(JumpNonZeroInstruction jump) {
+        Register destination = jump.register(registerMapping);
+        builder.append(String.format("cmp $%d, %s\n", 0, destination.registerName()));
+        builder.append(String.format("jnz %s\n", jump.target()));
     }
 
     private void addCtld() {
