@@ -11,7 +11,7 @@ public final class Block extends Node {
         this.exitNode = null;
     }
 
-    @Nullable public Node exitNode() {
+    @Nullable public ExitNode exitNode() {
         return exitNode;
     }
 

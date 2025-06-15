@@ -13,26 +13,32 @@ import java.util.*;
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
 public class InstructionSet {
-    private final SequencedSet<Block> blocks = new LinkedHashSet<>();
+    private final List<Block> blocks = new ArrayList<>();
+    private final Set<Block> blockVisited = new HashSet<>();
     private final Map<Block, List<Instruction>> instructions = new HashMap<>();
     private final VirtualRegisterAllocator registerAllocator;
 
     public InstructionSet(IrGraph graph, VirtualRegisterAllocator registerAllocator) {
         this.registerAllocator = registerAllocator;
-        Set<Node> visited = new HashSet<>();
-        visited.add(graph.endBlock());
-        scan(graph.endBlock(), visited);
+        scan(graph.endBlock());
         handlePhis(graph.endBlock());
+        handleJumps();
     }
 
-    public SequencedSet<Block> getBlocks() {
+    public List<Block> getBlocks() {
         return blocks;
     }
 
-    private void scan(Node node, Set<Node> visited) {
+    private void scan(Block endBlock) {
+        Set<Node> visited = new HashSet<>();
+        visited.add(endBlock);
+        scanRecursive(endBlock, visited);
+    }
+
+    private void scanRecursive(Node node, Set<Node> visited) {
         for (Node predecessor : node.predecessors()) {
             if (visited.add(predecessor)) {
-                scan(predecessor, visited);
+                scanRecursive(predecessor, visited);
             }
         }
         registerAllocator.allocateRegister(node);
@@ -46,6 +52,7 @@ public class InstructionSet {
             case ModNode mod -> newMod(mod);
             case ReturnNode ret -> newReturn(ret);
             case ConstIntNode constInt -> newConstInt(constInt);
+            case JumpNode _, IfNode _ -> {} // handle jumps later
             case Phi _ -> {} // ignore phis for now
             case ProjNode _, StartNode _ -> {}
         }
@@ -72,9 +79,35 @@ public class InstructionSet {
         }
     }
 
+    private void handleJumps() {
+        for (int i = 0; i < blocks.size(); i++) {
+            Block block = blocks.get(i);
+            ExitNode exitNode = block.exitNode();
+            if (exitNode instanceof JumpNode jump) {
+                if (i == blocks.size() - 1 || jump.targetBlock() == blocks.get(i + 1)) continue;
+                instructions.get(block).add(newJumpAlways(jump.targetBlock()));
+            }
+            else if (exitNode instanceof IfNode ifNode) {
+                if (i < blocks.size() - 1) {
+                    if (ifNode.trueEntry() == blocks.get(i + 1)) {
+                        instructions.get(block).add(newJumpZero(ifNode.falseEntry(), ifNode.condition()));
+                        continue;
+                    }
+                    if (ifNode.falseEntry() == blocks.get(i + 1)) {
+                        instructions.get(block).add(newJumpNonZero(ifNode.trueEntry(), ifNode.condition()));
+                        continue;
+                    }
+                }
+                instructions.get(block).add(newJumpZero(ifNode.falseEntry(), ifNode.condition()));
+                instructions.get(block).add(newJumpAlways(ifNode.trueEntry()));
+            }
+        }
+    }
+
     private void scanBlock(Block block) {
-        if (blocks.contains(block)) return;
+        if (blockVisited.contains(block)) return;
         blocks.add(block);
+        blockVisited.add(block);
         instructions.put(block, new ArrayList<>());
         instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
     }
@@ -107,8 +140,26 @@ public class InstructionSet {
         instructions.get(constInt.block()).add(new ConstIntInstruction(constInt, registerAllocator));
     }
 
-    private void scanPhi(Phi phi) {
+    private JumpInstruction newJumpAlways(Block target) {
+        JumpInstruction jump = new JumpAlwaysInstruction(target);
+        jump.addNonImmediateSuccessor(instructions.get(target).getFirst());
+        return jump;
+    }
 
+    private JumpInstruction newJumpZero(Block target, Node condition) {
+        JumpInstruction jump = new JumpZeroInstruction(
+                target, registerAllocator.get(condition)
+        );
+        jump.addNonImmediateSuccessor(instructions.get(target).getFirst());
+        return jump;
+    }
+
+    private JumpInstruction newJumpNonZero(Block target, Node condition) {
+        JumpInstruction jump = new JumpNonZeroInstruction(
+                target, registerAllocator.get(condition)
+        );
+        jump.addNonImmediateSuccessor(instructions.get(target).getFirst());
+        return jump;
     }
 
     private void addDivMod(Node node) {

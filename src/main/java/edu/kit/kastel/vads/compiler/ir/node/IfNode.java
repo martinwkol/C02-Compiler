@@ -1,6 +1,7 @@
 package edu.kit.kastel.vads.compiler.ir.node;
 
 public final class IfNode extends ExitNode {
+    public static final int CONDITION = 0;
     private final Block trueEntry;
     private final Block falseEntry;
 
@@ -8,6 +9,10 @@ public final class IfNode extends ExitNode {
         super(block, condition);
         this.trueEntry = trueEntry;
         this.falseEntry = falseEntry;
+    }
+
+    public Node condition() {
+        return this.predecessor(CONDITION);
     }
 
     public Block trueEntry() {

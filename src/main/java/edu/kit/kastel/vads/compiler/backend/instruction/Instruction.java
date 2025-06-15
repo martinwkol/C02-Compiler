@@ -14,7 +14,8 @@ import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipPr
 
 public abstract sealed class Instruction permits
         BinaryOperationInstruction, ConstIntInstruction, CtldInstruction, DivModInstruction,
-        MoveInstruction, ReturnInstruction,
+        MoveInstruction,
+        ReturnInstruction, JumpInstruction,
         LabelInstruction
 {
     protected final Set<Register> live = new HashSet<>();
