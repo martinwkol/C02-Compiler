@@ -10,7 +10,8 @@ import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipPr
 public abstract sealed class BinaryOperationInstruction extends Instruction permits
         AddInstruction, SubInstruction, MulInstruction,
         EqualsInstruction, UnequalsInstruction, SmallerInstruction, SmallerEqInstruction,
-        BiggerInstruction, BiggerEqInstruction
+        BiggerInstruction, BiggerEqInstruction,
+        BitAndInstruction, BitOrInstruction, BitXorInstruction
 {
     private final Register destination;
     private final Register left;

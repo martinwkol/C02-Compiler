@@ -50,15 +50,22 @@ public class InstructionSet {
             case MulNode mul -> newMul(mul);
             case DivNode div -> newDiv(div);
             case ModNode mod -> newMod(mod);
+
+            case BitAndNode bitAnd -> newBitAnd(bitAnd);
+            case BitOrNode bitOr -> newBitOr(bitOr);
+            case BitXorNode bitXor -> newBitXor(bitXor);
+
             case CEqualsNode equals -> newEquals(equals);
             case CUnequalsNode unequals -> newUnequals(unequals);
             case CSmallerNode smaller -> newSmaller(smaller);
             case CSmallerEqNode smallerEq -> newSmallerEq(smallerEq);
             case CBiggerNode bigger -> newBigger(bigger);
             case CBiggerEqNode biggerEq -> newBiggerEq(biggerEq);
-            case ReturnNode ret -> newReturn(ret);
+            
             case ConstBoolNode constBool -> newConstBool(constBool);
             case ConstIntNode constInt -> newConstInt(constInt);
+
+            case ReturnNode ret -> newReturn(ret);
             case JumpNode _, IfNode _ -> {} // handle jumps later
             case Phi _ -> {} // ignore phis for now
             case ProjNode _, StartNode _ -> {}
@@ -137,6 +144,18 @@ public class InstructionSet {
 
     private void newMod(ModNode mod) {
         addDivMod(mod);
+    }
+
+    private void newBitAnd(BitAndNode bitAnd) {
+        instructions.get(bitAnd.block()).add(new BitAndInstruction(bitAnd, registerAllocator));
+    }
+
+    private void newBitOr(BitOrNode bitOr) {
+        instructions.get(bitOr.block()).add(new BitOrInstruction(bitOr, registerAllocator));
+    }
+
+    private void newBitXor(BitXorNode bitXor) {
+        instructions.get(bitXor.block()).add(new BitXorInstruction(bitXor, registerAllocator));
     }
 
     private void newEquals(CEqualsNode equals) {
