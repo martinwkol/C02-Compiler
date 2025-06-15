@@ -64,6 +64,10 @@ class GraphConstructor {
         return this.optimizer.transform(new BitXorNode(currentBlock(), left, right));
     }
 
+    public Node newBitNegation(Node node) {
+        return this.optimizer.transform(new BitNegationNode(currentBlock(), node));
+    }
+
     public Node newEquals(Node left, Node right) {
         return this.optimizer.transform(new CEqualsNode(currentBlock(), left, right));
     }
@@ -86,6 +90,10 @@ class GraphConstructor {
 
     public Node newBiggerEq(Node left, Node right) {
         return this.optimizer.transform(new CBiggerEqNode(currentBlock(), left, right));
+    }
+
+    public Node newLogNegation(Node node) {
+        return this.optimizer.transform(new LogNegationNode(currentBlock(), node));
     }
 
     public Node newReturn(Node result) {

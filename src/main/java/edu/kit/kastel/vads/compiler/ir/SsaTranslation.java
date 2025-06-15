@@ -8,6 +8,7 @@ import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
 import edu.kit.kastel.vads.compiler.ir.util.LoopInfo;
+import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
@@ -78,6 +79,9 @@ public class SsaTranslation {
                 case ASSIGN_MUL -> data.constructor::newMul;
                 case ASSIGN_DIV -> (lhs, rhs) -> projResultDivMod(data, data.constructor.newDiv(lhs, rhs));
                 case ASSIGN_MOD -> (lhs, rhs) -> projResultDivMod(data, data.constructor.newMod(lhs, rhs));
+                case ASSIGN_BITWISE_AND -> data.constructor::newBitAnd;
+                case ASSIGN_BITWISE_OR -> data.constructor::newBitOr;
+                case ASSIGN_BITWISE_XOR -> data.constructor::newBitXor;
                 case ASSIGN -> null;
                 default ->
                     throw new IllegalArgumentException("not an assignment operator " + assignmentTree.operator());
@@ -107,8 +111,26 @@ public class SsaTranslation {
                 case MUL -> data.constructor.newMul(lhs, rhs);
                 case DIV -> projResultDivMod(data, data.constructor.newDiv(lhs, rhs));
                 case MOD -> projResultDivMod(data, data.constructor.newMod(lhs, rhs));
+                case BITWISE_AND -> data.constructor.newBitAnd(lhs, rhs);
+                case BITWISE_OR -> data.constructor.newBitOr(lhs, rhs);
+                case BITWISE_XOR -> data.constructor.newBitXor(lhs, rhs);
                 default ->
                     throw new IllegalArgumentException("not a binary expression operator " + binaryOperationTree.operatorType());
+            };
+            popSpan();
+            return Optional.of(res);
+        }
+
+        @Override
+        public Optional<Node> visit(NegateTree negateTree, SsaTranslation data) {
+            pushSpan(negateTree);
+            Node node = negateTree.expression().accept(this, data).orElseThrow();
+            Node res = switch (negateTree.operator()) {
+                case MINUS -> data.constructor.newSub(data.constructor.newConstInt(0), node);
+                case LOGICAL_NOT -> data.constructor.newLogNegation(node);
+                case BITWISE_NOT -> data.constructor.newBitNegation(node);
+                default ->
+                        throw new IllegalArgumentException("not a unary expression operator " + negateTree.operator());
             };
             popSpan();
             return Optional.of(res);
@@ -338,15 +360,6 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(NameTree nameTree, SsaTranslation data) {
             return NOT_AN_EXPRESSION;
-        }
-
-        @Override
-        public Optional<Node> visit(NegateTree negateTree, SsaTranslation data) {
-            pushSpan(negateTree);
-            Node node = negateTree.expression().accept(this, data).orElseThrow();
-            Node res = data.constructor.newSub(data.constructor.newConstInt(0), node);
-            popSpan();
-            return Optional.of(res);
         }
 
         @Override
