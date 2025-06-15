@@ -11,11 +11,13 @@ public class AssemblyGenerator {
     private final RegisterMapping registerMapping;
     private @Nullable VirtualRegister storedInTemp;
     private final int maxStackUsage;
+    private int comparisonLabelCounter;
 
     public AssemblyGenerator(InstructionSet instructionSet, RegisterMapping registerMapping, int maxStackUsage) {
         this.instructionSet = instructionSet;
         this.registerMapping = registerMapping;
         this.maxStackUsage = maxStackUsage;
+        this.comparisonLabelCounter = 0;
         storedInTemp = null;
         addStarterCode();
         if (maxStackUsage > 0)
@@ -67,6 +69,12 @@ public class AssemblyGenerator {
             case ShiftLeftInstruction shiftLeft -> addBinary(shiftLeft, "sal", false);
             case ShiftRightInstruction shiftRight -> addBinary(shiftRight, "sar", false);
 
+            case EqualsInstruction equals -> addComparison(equals, "je");
+            case UnequalsInstruction unequals -> addComparison(unequals, "jne");
+            case SmallerInstruction smaller -> addComparison(smaller, "jl");
+            case SmallerEqInstruction smallerEq -> addComparison(smallerEq, "jle");
+            case BiggerInstruction bigger -> addComparison(bigger, "jg");
+            case BiggerEqInstruction biggerEq -> addComparison(biggerEq, "jge");
 
             case ConstIntInstruction constInt -> addConstInt(constInt);
             case ConstBoolInstruction constBool -> addConstBool(constBool);
@@ -77,10 +85,10 @@ public class AssemblyGenerator {
         }
     }
 
-    private void addBinary(BinaryOperationInstruction node, String assemblyInstructionName, boolean commutative) {
-        Register destination = node.getDestination(registerMapping);
-        Register left = node.getLeft(registerMapping);
-        Register right = node.getRight(registerMapping);
+    private void addBinary(BinaryOperationInstruction binOp, String assemblyInstructionName, boolean commutative) {
+        Register destination = binOp.getDestination(registerMapping);
+        Register left = binOp.getLeft(registerMapping);
+        Register right = binOp.getRight(registerMapping);
 
         if (right instanceof PhysicalRegister && right.equals(destination)) { // -> destination physical -> temp free
             if (commutative) {
@@ -103,6 +111,30 @@ public class AssemblyGenerator {
             )
         );
         moveToStackIfVirtual(destination);
+    }
+
+    private void addComparison(BinaryOperationInstruction binOp, String jumpInstruction) {
+        Register destination = binOp.getDestination(registerMapping);
+        Register left = binOp.getLeft(registerMapping);
+        Register right = binOp.getRight(registerMapping);
+        if (left instanceof VirtualRegister && right instanceof VirtualRegister) {
+            moveToTempIfVirtual(left);
+            builder.append(String.format("cmp %s, %s\n", physical(left).registerName(), right.registerName()));
+            discardTemp();
+        }
+        else {
+            builder.append(String.format("cmp %s, %s\n", left.registerName(), right.registerName()));
+        }
+        String labelTrue = String.format("C%dT", comparisonLabelCounter);
+        String labelEnd = String.format("C%dE", comparisonLabelCounter);
+        comparisonLabelCounter++;
+
+        builder.append(String.format("%s %s\n", jumpInstruction, labelTrue));
+        builder.append(String.format("movl $%d, %s\n", 0, destination.registerName()));
+        builder.append(String.format("jmp %s\n", labelEnd));
+        builder.append(String.format("%s:\n", labelTrue));
+        builder.append(String.format("movl $%d, %s\n", 1, destination.registerName()));
+        builder.append(String.format("%s:\n", labelEnd));
     }
 
     private void addCtld() {
@@ -145,6 +177,7 @@ public class AssemblyGenerator {
             builder.append(String.format("addq $%d, %%rsp\n", maxStackUsage));
         builder.append("ret\n");
     }
+
 
 
 
