@@ -266,8 +266,9 @@ public class Parser {
     private ExpressionTree parseDisEquality() {
         ExpressionTree lhs = parseIntegerComparison();
         while (this.tokenSource.peek().isOperator(OperatorType.EQUALITY, OperatorType.DISEQUALITY)) {
+            OperatorType operatorType = ((Operator)this.tokenSource.peek()).type();
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseIntegerComparison(), ((Operator)this.tokenSource.peek()).type());
+            lhs = new BinaryOperationTree(lhs, parseIntegerComparison(), operatorType);
         }
         return lhs;
     }
@@ -278,8 +279,9 @@ public class Parser {
                 OperatorType.SMALLER, OperatorType.SMALLER_EQUAL,
                 OperatorType.BIGGER, OperatorType.BIGGER_EQUAL
         )) {
+            OperatorType operatorType = ((Operator)this.tokenSource.peek()).type();
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseShift(), ((Operator)this.tokenSource.peek()).type());
+            lhs = new BinaryOperationTree(lhs, parseShift(), operatorType);
         }
         return lhs;
     }
@@ -289,8 +291,9 @@ public class Parser {
         while (this.tokenSource.peek().isOperator(
                 OperatorType.SHIFT_LEFT, OperatorType.SHIFT_RIGHT
         )) {
+            OperatorType operatorType = ((Operator)this.tokenSource.peek()).type();
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parsePlusMinus(), ((Operator)this.tokenSource.peek()).type());
+            lhs = new BinaryOperationTree(lhs, parsePlusMinus(), operatorType);
         }
         return lhs;
     }
@@ -298,8 +301,9 @@ public class Parser {
     private ExpressionTree parsePlusMinus() {
         ExpressionTree lhs = parseMulDivMod();
         while (this.tokenSource.peek().isOperator(OperatorType.PLUS, OperatorType.MINUS)) {
+            OperatorType operatorType = ((Operator)this.tokenSource.peek()).type();
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseMulDivMod(), ((Operator)this.tokenSource.peek()).type());
+            lhs = new BinaryOperationTree(lhs, parseMulDivMod(), operatorType);
         }
         return lhs;
     }
@@ -309,8 +313,9 @@ public class Parser {
         while (this.tokenSource.peek().isOperator(
                 OperatorType.MUL, OperatorType.DIV, OperatorType.MOD
         )) {
+            OperatorType operatorType = ((Operator)this.tokenSource.peek()).type();
             this.tokenSource.consume();
-            lhs = new BinaryOperationTree(lhs, parseFactor(), ((Operator)this.tokenSource.peek()).type());
+            lhs = new BinaryOperationTree(lhs, parseFactor(), operatorType);
         }
         return lhs;
     }
