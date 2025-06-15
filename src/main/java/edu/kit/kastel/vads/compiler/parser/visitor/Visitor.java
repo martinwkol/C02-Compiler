@@ -43,7 +43,7 @@ public interface Visitor<T, R> {
 
     R visit(NameTree nameTree, T data);
 
-    R visit(NegateTree negateTree, T data);
+    R visit(UnaryOperatorTree unaryOperatorTree, T data);
 
     R visit(ProgramTree programTree, T data);
 

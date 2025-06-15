@@ -327,7 +327,7 @@ public class Parser {
                     type == OperatorType.MINUS || type == OperatorType.LOGICAL_NOT
                     || type == OperatorType.BITWISE_NOT -> {
                 Span span = this.tokenSource.consume().span();
-                yield new NegateTree(parseFactor(), type, span);
+                yield new UnaryOperatorTree(parseFactor(), type, span);
             }
             case Identifier ident -> {
                 this.tokenSource.consume();

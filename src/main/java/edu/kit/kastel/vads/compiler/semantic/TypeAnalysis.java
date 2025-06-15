@@ -114,21 +114,21 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
     }
 
     @Override
-    public Unit visit(NegateTree negateTree, TypeMapping data) {
-        Type type = data.get(negateTree.expression());
+    public Unit visit(UnaryOperatorTree unaryOperatorTree, TypeMapping data) {
+        Type type = data.get(unaryOperatorTree.expression());
         if (type == BasicType.BOOL) {
-            if (negateTree.operator() == Operator.OperatorType.LOGICAL_NOT) {
-                data.put(negateTree, BasicType.BOOL);
+            if (unaryOperatorTree.operator() == Operator.OperatorType.LOGICAL_NOT) {
+                data.put(unaryOperatorTree, BasicType.BOOL);
             } else {
-                throw new SemanticException(negateTree.operator() + " does not match boolean");
+                throw new SemanticException(unaryOperatorTree.operator() + " does not match boolean");
             }
         } else if (type == BasicType.INT) {
-            switch (negateTree.operator()) {
-                case MINUS, BITWISE_NOT -> data.put(negateTree, BasicType.INT);
-                default -> throw new SemanticException(negateTree.operator() + " does not match integer");
+            switch (unaryOperatorTree.operator()) {
+                case MINUS, BITWISE_NOT -> data.put(unaryOperatorTree, BasicType.INT);
+                default -> throw new SemanticException(unaryOperatorTree.operator() + " does not match integer");
             }
         }
-        return NoOpVisitor.super.visit(negateTree, data);
+        return NoOpVisitor.super.visit(unaryOperatorTree, data);
     }
 
     @Override

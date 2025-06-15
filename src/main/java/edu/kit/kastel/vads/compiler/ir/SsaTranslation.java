@@ -11,7 +11,6 @@ import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 import edu.kit.kastel.vads.compiler.util.Union;
 
-import java.net.http.HttpResponse;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
@@ -146,15 +145,15 @@ public class SsaTranslation {
         }
 
         @Override
-        public Optional<Node> visit(NegateTree negateTree, SsaTranslation data) {
-            pushSpan(negateTree);
-            Node node = negateTree.expression().accept(this, data).orElseThrow();
-            Node res = switch (negateTree.operator()) {
+        public Optional<Node> visit(UnaryOperatorTree unaryOperatorTree, SsaTranslation data) {
+            pushSpan(unaryOperatorTree);
+            Node node = unaryOperatorTree.expression().accept(this, data).orElseThrow();
+            Node res = switch (unaryOperatorTree.operator()) {
                 case MINUS -> data.constructor.newSub(data.constructor.newConstInt(0), node);
                 case LOGICAL_NOT -> data.constructor.newLogNegation(node);
                 case BITWISE_NOT -> data.constructor.newBitNegation(node);
                 default ->
-                        throw new IllegalArgumentException("not a unary expression operator " + negateTree.operator());
+                        throw new IllegalArgumentException("not a unary expression operator " + unaryOperatorTree.operator());
             };
             popSpan();
             return Optional.of(res);

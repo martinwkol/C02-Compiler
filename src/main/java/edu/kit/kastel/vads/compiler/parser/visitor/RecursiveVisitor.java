@@ -151,10 +151,10 @@ public class RecursiveVisitor<T, R> implements Visitor<T, R> {
     }
 
     @Override
-    public R visit(NegateTree negateTree, T data) {
-        R r = this.preorderVisitor.visit(negateTree, data);
-        r = negateTree.expression().accept(this, accumulate(data, r));
-        r = this.postorderVisitor.visit(negateTree, accumulate(data, r));
+    public R visit(UnaryOperatorTree unaryOperatorTree, T data) {
+        R r = this.preorderVisitor.visit(unaryOperatorTree, data);
+        r = unaryOperatorTree.expression().accept(this, accumulate(data, r));
+        r = this.postorderVisitor.visit(unaryOperatorTree, accumulate(data, r));
         return r;
     }
 
