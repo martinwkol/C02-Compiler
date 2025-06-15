@@ -114,6 +114,12 @@ public class SsaTranslation {
                 case BITWISE_AND -> data.constructor.newBitAnd(lhs, rhs);
                 case BITWISE_OR -> data.constructor.newBitOr(lhs, rhs);
                 case BITWISE_XOR -> data.constructor.newBitXor(lhs, rhs);
+                case EQUALITY -> data.constructor.newEquals(lhs, rhs);
+                case DISEQUALITY -> data.constructor.newUnequals(lhs, rhs);
+                case SMALLER -> data.constructor.newSmaller(lhs, rhs);
+                case SMALLER_EQUAL -> data.constructor.newSmallerEq(lhs, rhs);
+                case BIGGER -> data.constructor.newBigger(lhs, rhs);
+                case BIGGER_EQUAL -> data.constructor.newBiggerEq(lhs, rhs);
                 default ->
                     throw new IllegalArgumentException("not a binary expression operator " + binaryOperationTree.operatorType());
             };
