@@ -12,7 +12,11 @@ import java.util.Set;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
-public abstract sealed class Instruction permits BinaryOperationInstruction, ConstIntInstruction, CtldInstruction, DivModInstruction, MoveInstruction, ReturnInstruction {
+public abstract sealed class Instruction permits
+        BinaryOperationInstruction, ConstIntInstruction, CtldInstruction, DivModInstruction,
+        MoveInstruction, ReturnInstruction,
+        LabelInstruction
+{
     protected final Set<Register> live = new HashSet<>();
     protected final Set<Register> defines = new HashSet<>();
     protected final Set<Register> uses = new HashSet<>();
