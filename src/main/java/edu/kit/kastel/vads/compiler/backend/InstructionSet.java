@@ -8,26 +8,24 @@ import edu.kit.kastel.vads.compiler.backend.register.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.node.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
-public class InstructionBlock {
-    private final List<Instruction> instructions = new ArrayList<>();
+public class InstructionSet {
+    private final SequencedSet<Block> blocks = new LinkedHashSet<>();
+    private final Map<Block, List<Instruction>> instructions = new HashMap<>();
     private final VirtualRegisterAllocator registerAllocator;
 
-    public InstructionBlock(IrGraph graph, VirtualRegisterAllocator registerAllocator) {
+    public InstructionSet(IrGraph graph, VirtualRegisterAllocator registerAllocator) {
         this.registerAllocator = registerAllocator;
         Set<Node> visited = new HashSet<>();
         visited.add(graph.endBlock());
         scan(graph.endBlock(), visited);
     }
 
-    public List<Instruction> getInstructions() {
-        return instructions;
+    public SequencedSet<Block> getBlocks() {
+        return blocks;
     }
 
     private void scan(Node node, Set<Node> visited) {
@@ -39,15 +37,51 @@ public class InstructionBlock {
         registerAllocator.allocateRegister(node);
 
         switch (node) {
-            case AddNode add -> instructions.add(new AddInstruction(add, registerAllocator));
-            case SubNode sub -> instructions.add(new SubInstruction(sub, registerAllocator));
-            case MulNode mul -> instructions.add(new MulInstruction(mul, registerAllocator));
-            case DivNode _, ModNode _ -> addDivMod(node);
-            case ReturnNode r -> instructions.add(new ReturnInstruction(r, registerAllocator));
-            case ConstIntNode c -> instructions.add(new ConstIntInstruction(c, registerAllocator));
+            case Block block -> scanBlock(block);
+            case AddNode add -> newAdd(add);
+            case SubNode sub -> newSub(sub);
+            case MulNode mul -> newMul(mul);
+            case DivNode div -> newDiv(div);
+            case ModNode mod -> newMod(mod);
+            case ReturnNode ret -> newReturn(ret);
+            case ConstIntNode constInt -> newConstInt(constInt);
             case Phi _ -> throw new UnsupportedOperationException("phi");
-            case Block _, ProjNode _, StartNode _ -> {}
+            case ProjNode _, StartNode _ -> {}
         }
+    }
+
+    private void scanBlock(Block block) {
+        if (blocks.contains(block)) return;
+        blocks.add(block);
+        instructions.put(block, new ArrayList<>());
+    }
+
+    private void newAdd(AddNode add) {
+        instructions.get(add.block()).add(new AddInstruction(add, registerAllocator));
+    }
+
+    private void newSub(SubNode sub) {
+        instructions.get(sub.block()).add(new SubInstruction(sub, registerAllocator));
+    }
+
+    private void newMul(MulNode mul) {
+        instructions.get(mul.block()).add(new MulInstruction(mul, registerAllocator));
+    }
+
+    private void newDiv(DivNode div) {
+        addDivMod(div);
+    }
+
+    private void newMod(ModNode mod) {
+        addDivMod(mod);
+    }
+
+    private void newReturn(ReturnNode ret) {
+        instructions.get(ret.block()).add(new ReturnInstruction(ret, registerAllocator));
+    }
+
+    private void newConstInt(ConstIntNode constInt) {
+        instructions.get(constInt.block()).add(new ConstIntInstruction(constInt, registerAllocator));
     }
 
     private void addDivMod(Node node) {
@@ -56,16 +90,16 @@ public class InstructionBlock {
         Register left = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.LEFT));
         Register right = registerAllocator.get(predecessorSkipProj(node, BinaryOperationNode.RIGHT));
 
-        instructions.add(new MoveInstruction(left, PhysicalRegister.DividendLS));
-        instructions.add(new CtldInstruction());
-        instructions.add(new DivModInstruction(right));
+        List<Instruction> instructionList = instructions.get(node.block());
+        instructionList.add(new MoveInstruction(left, PhysicalRegister.DividendLS));
+        instructionList.add(new CtldInstruction());
+        instructionList.add(new DivModInstruction(right));
         if (node instanceof DivNode) {
-            instructions.add(new MoveInstruction(PhysicalRegister.Quotient, destination));
+            instructionList.add(new MoveInstruction(PhysicalRegister.Quotient, destination));
         } else {
-            instructions.add(new MoveInstruction(PhysicalRegister.Remainder, destination));
+            instructionList.add(new MoveInstruction(PhysicalRegister.Remainder, destination));
         }
     }
-
 
     public void deduceLiveness() {
         for (Instruction instruction : instructions) {

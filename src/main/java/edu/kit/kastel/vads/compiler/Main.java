@@ -1,9 +1,8 @@
 package edu.kit.kastel.vads.compiler;
 
 import edu.kit.kastel.vads.compiler.backend.AssemblyGenerator;
-import edu.kit.kastel.vads.compiler.backend.InstructionBlock;
+import edu.kit.kastel.vads.compiler.backend.InstructionSet;
 import edu.kit.kastel.vads.compiler.backend.InterferenceGraph;
-import edu.kit.kastel.vads.compiler.backend.register.OptimizedRegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 import edu.kit.kastel.vads.compiler.backend.register.VirtualRegisterAllocator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
@@ -80,7 +79,7 @@ public class Main {
 
     private static String generateAssembly(List<IrGraph> graphs) {
         VirtualRegisterAllocator virtualRA = new VirtualRegisterAllocator();
-        InstructionBlock ib = new InstructionBlock(graphs.getFirst(), virtualRA);
+        InstructionSet ib = new InstructionSet(graphs.getFirst(), virtualRA);
         ib.deduceLiveness();
 
         InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();

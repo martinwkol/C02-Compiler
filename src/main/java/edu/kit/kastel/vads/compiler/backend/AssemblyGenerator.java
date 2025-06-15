@@ -2,10 +2,7 @@ package edu.kit.kastel.vads.compiler.backend;
 
 import edu.kit.kastel.vads.compiler.backend.instruction.*;
 import edu.kit.kastel.vads.compiler.backend.register.*;
-import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
-
-import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
 public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();
@@ -13,7 +10,7 @@ public class AssemblyGenerator {
     private @Nullable VirtualRegister storedInTemp;
     private final int maxStackUsage;
 
-    public AssemblyGenerator(InstructionBlock block, RegisterMapping registerMapping, int maxStackUsage) {
+    public AssemblyGenerator(InstructionSet block, RegisterMapping registerMapping, int maxStackUsage) {
         this.registerMapping = registerMapping;
         this.maxStackUsage = maxStackUsage;
         storedInTemp = null;
