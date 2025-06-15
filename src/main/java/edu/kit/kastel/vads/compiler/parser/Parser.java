@@ -91,7 +91,7 @@ public class Parser {
     }
 
     private StatementTree parseDecSimple() {
-        if (this.tokenSource.peek().isKeyword(KeywordType.INT)) {
+        if (this.tokenSource.peek().isKeyword(KeywordType.INT, KeywordType.BOOL)) {
             return parseDeclaration();
         } else {
             return parseSimple();

@@ -108,7 +108,7 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
                 default -> throw new SemanticException("Operator " + binaryOperationTree.operatorType() + " does not match (int, int)");
             }
         } else {
-            throw new SemanticException("Unsupported type " + left);
+            throw new SemanticException("Unsupported type " + left + " at " + binaryOperationTree.span());
         }
         return NoOpVisitor.super.visit(binaryOperationTree, data);
     }
