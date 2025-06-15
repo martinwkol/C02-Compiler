@@ -61,7 +61,7 @@ public class InstructionSet {
             case CSmallerEqNode smallerEq -> newSmallerEq(smallerEq);
             case CBiggerNode bigger -> newBigger(bigger);
             case CBiggerEqNode biggerEq -> newBiggerEq(biggerEq);
-            
+
             case ConstBoolNode constBool -> newConstBool(constBool);
             case ConstIntNode constInt -> newConstInt(constInt);
 
