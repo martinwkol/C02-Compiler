@@ -29,6 +29,47 @@ public class InstructionSet {
         return blocks;
     }
 
+    public void deduceLiveness() {
+        for (Block block : blocks) {
+            for (Instruction instruction : instructions.get(block)) {
+                instruction.markUsedAsLive();
+            }
+        }
+
+        boolean changes = true;
+        while (changes) {
+            changes = false;
+            Instruction next = null;
+            for (int i = blocks.size() - 1; i >= 0; --i) {
+                List<Instruction> instructionList = instructions.get(blocks.get(i));
+                for (int j = instructionList.size() - 1; j >= 0; --j) {
+                    Instruction instruction = instructionList.get(j);
+                    boolean changesForInstruction = instruction.deduceLiveness(next);
+                    changes = changes || changesForInstruction;
+                    next = instruction;
+                }
+            }
+        }
+    }
+
+    public InterferenceGraph buildInterferenceGraph() {
+        InterferenceGraph interferenceGraph = new InterferenceGraph();
+        for (VirtualRegister virtualRegister : registerAllocator.usedRegisters()) {
+            interferenceGraph.addRegister(virtualRegister);
+        }
+
+        Instruction next = null;
+        for (int i = blocks.size() - 1; i >= 0; --i) {
+            List<Instruction> instructionList = instructions.get(blocks.get(i));
+            for (int j = instructionList.size() - 1; j >= 0; --j) {
+                Instruction instruction = instructionList.get(j);
+                instruction.addEdges(interferenceGraph, next);
+                next = instruction;
+            }
+        }
+        return interferenceGraph;
+    }
+
     private void scan(Block endBlock) {
         Set<Node> visited = new HashSet<>();
         visited.add(endBlock);
@@ -252,46 +293,5 @@ public class InstructionSet {
         } else {
             instructionList.add(new MoveInstruction(PhysicalRegister.Remainder, destination));
         }
-    }
-
-    public void deduceLiveness() {
-        for (Block block : blocks) {
-            for (Instruction instruction : instructions.get(block)) {
-                instruction.markUsedAsLive();
-            }
-        }
-
-        boolean changes = true;
-        while (changes) {
-            changes = false;
-            Instruction next = null;
-            for (int i = blocks.size() - 1; i >= 0; --i) {
-                List<Instruction> instructionList = instructions.get(blocks.get(i));
-                for (int j = instructionList.size() - 1; j >= 0; --j) {
-                    Instruction instruction = instructionList.get(j);
-                    boolean changesForInstruction = instruction.deduceLiveness(next);
-                    changes = changes || changesForInstruction;
-                    next = instruction;
-                }
-            }
-        }
-    }
-
-    public InterferenceGraph buildInterferenceGraph() {
-        InterferenceGraph interferenceGraph = new InterferenceGraph();
-        for (VirtualRegister virtualRegister : registerAllocator.usedRegisters()) {
-            interferenceGraph.addRegister(virtualRegister);
-        }
-
-        Instruction next = null;
-        for (int i = blocks.size() - 1; i >= 0; --i) {
-            List<Instruction> instructionList = instructions.get(blocks.get(i));
-            for (int j = instructionList.size() - 1; j >= 0; --j) {
-                Instruction instruction = instructionList.get(j);
-                instruction.addEdges(interferenceGraph, next);
-                next = instruction;
-            }
-        }
-        return interferenceGraph;
     }
 }
