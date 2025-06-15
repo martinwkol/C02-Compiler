@@ -19,11 +19,11 @@ public class Union<R, S> {
         return new Union<>(null, s);
     }
 
-    boolean isFirst() {
+    public boolean isFirst() {
         return this.r != null;
     }
 
-    boolean isSecond() {
+    public boolean isSecond() {
         return this.s != null;
     }
 
