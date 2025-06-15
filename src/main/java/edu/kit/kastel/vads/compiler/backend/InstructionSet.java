@@ -44,33 +44,36 @@ public class InstructionSet {
         registerAllocator.allocateRegister(node);
 
         switch (node) {
-            case Block block -> scanBlock(block);
-            case AddNode add -> newAdd(add);
-            case SubNode sub -> newSub(sub);
-            case MulNode mul -> newMul(mul);
-            case DivNode div -> newDiv(div);
-            case ModNode mod -> newMod(mod);
+            case Block block                    -> scanBlock(block);
+            case AddNode add                    -> newAdd(add);
+            case SubNode sub                    -> newSub(sub);
+            case MulNode mul                    -> newMul(mul);
+            case DivNode div                    -> newDiv(div);
+            case ModNode mod                    -> newMod(mod);
 
-            case BitAndNode bitAnd -> newBitAnd(bitAnd);
-            case BitOrNode bitOr -> newBitOr(bitOr);
-            case BitXorNode bitXor -> newBitXor(bitXor);
-            case BitNegationNode bitNegation -> newBitNegation(bitNegation);
+            case BitAndNode bitAnd              -> newBitAnd(bitAnd);
+            case BitOrNode bitOr                -> newBitOr(bitOr);
+            case BitXorNode bitXor              -> newBitXor(bitXor);
+            case BitNegationNode bitNegation    -> newBitNegation(bitNegation);
 
-            case CEqualsNode equals -> newEquals(equals);
-            case CUnequalsNode unequals -> newUnequals(unequals);
-            case CSmallerNode smaller -> newSmaller(smaller);
-            case CSmallerEqNode smallerEq -> newSmallerEq(smallerEq);
-            case CBiggerNode bigger -> newBigger(bigger);
-            case CBiggerEqNode biggerEq -> newBiggerEq(biggerEq);
-            case LogNegationNode logNegation -> newLogNegation(logNegation);
+            case ShiftLeftNode shiftLeft        -> newShiftLeft(shiftLeft);
+            case ShiftRightNode shiftRight      -> newShiftRight(shiftRight);
 
-            case ConstBoolNode constBool -> newConstBool(constBool);
-            case ConstIntNode constInt -> newConstInt(constInt);
+            case CEqualsNode equals             -> newEquals(equals);
+            case CUnequalsNode unequals         -> newUnequals(unequals);
+            case CSmallerNode smaller           -> newSmaller(smaller);
+            case CSmallerEqNode smallerEq       -> newSmallerEq(smallerEq);
+            case CBiggerNode bigger             -> newBigger(bigger);
+            case CBiggerEqNode biggerEq         -> newBiggerEq(biggerEq);
+            case LogNegationNode logNegation    -> newLogNegation(logNegation);
 
-            case ReturnNode ret -> newReturn(ret);
-            case JumpNode _, IfNode _ -> {} // handle jumps later
-            case Phi _ -> {} // ignore phis for now
-            case ProjNode _, StartNode _ -> {}
+            case ConstBoolNode constBool        -> newConstBool(constBool);
+            case ConstIntNode constInt          -> newConstInt(constInt);
+
+            case ReturnNode ret                 -> newReturn(ret);
+            case JumpNode _, IfNode _           -> {} // handle jumps later
+            case Phi _                          -> {} // ignore phis for now
+            case ProjNode _, StartNode _        -> {}
         }
     }
 
@@ -162,6 +165,14 @@ public class InstructionSet {
 
     private void newBitNegation(BitNegationNode bitNegation) {
         instructions.get(bitNegation.block()).add(new BitNegationInstruction(bitNegation, registerAllocator));
+    }
+
+    private void newShiftLeft(ShiftLeftNode shiftLeft) {
+        instructions.get(shiftLeft.block()).add(new ShiftLeftInstruction(shiftLeft, registerAllocator));
+    }
+
+    private void newShiftRight(ShiftRightNode shiftRight) {
+        instructions.get(shiftRight.block()).add(new ShiftRightInstruction(shiftRight, registerAllocator));
     }
 
     private void newEquals(CEqualsNode equals) {

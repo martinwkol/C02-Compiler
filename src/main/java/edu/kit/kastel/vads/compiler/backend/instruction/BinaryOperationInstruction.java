@@ -11,7 +11,8 @@ public abstract sealed class BinaryOperationInstruction extends Instruction perm
         AddInstruction, SubInstruction, MulInstruction,
         EqualsInstruction, UnequalsInstruction, SmallerInstruction, SmallerEqInstruction,
         BiggerInstruction, BiggerEqInstruction,
-        BitAndInstruction, BitOrInstruction, BitXorInstruction
+        BitAndInstruction, BitOrInstruction, BitXorInstruction,
+        ShiftLeftInstruction, ShiftRightInstruction
 {
     private final Register destination;
     private final Register left;
