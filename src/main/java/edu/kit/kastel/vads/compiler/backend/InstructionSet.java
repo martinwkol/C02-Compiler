@@ -180,19 +180,24 @@ public class InstructionSet {
     }
 
     public void deduceLiveness() {
-        for (Instruction instruction : instructions) {
-            instruction.markUsedAsLive();
+        for (Block block : blocks) {
+            for (Instruction instruction : instructions.get(block)) {
+                instruction.markUsedAsLive();
+            }
         }
 
         boolean changes = true;
         while (changes) {
             changes = false;
             Instruction next = null;
-            for (int i = instructions.size() - 1; i >= 0; --i) {
-                Instruction instruction = instructions.get(i);
-                boolean changesForInstruction = instruction.deduceLiveness(next);
-                changes = changes || changesForInstruction;
-                next = instruction;
+            for (int i = blocks.size() - 1; i >= 0; --i) {
+                List<Instruction> instructionList = instructions.get(blocks.get(i));
+                for (int j = instructionList.size() - 1; j >= 0; --j) {
+                    Instruction instruction = instructionList.get(j);
+                    boolean changesForInstruction = instruction.deduceLiveness(next);
+                    changes = changes || changesForInstruction;
+                    next = instruction;
+                }
             }
         }
     }
@@ -202,11 +207,15 @@ public class InstructionSet {
         for (VirtualRegister virtualRegister : registerAllocator.usedRegisters()) {
             interferenceGraph.addRegister(virtualRegister);
         }
+
         Instruction next = null;
-        for (int i = instructions.size() - 1; i >= 0; --i) {
-            Instruction instruction = instructions.get(i);
-            instruction.addEdges(interferenceGraph, next);
-            next = instruction;
+        for (int i = blocks.size() - 1; i >= 0; --i) {
+            List<Instruction> instructionList = instructions.get(blocks.get(i));
+            for (int j = instructionList.size() - 1; j >= 0; --j) {
+                Instruction instruction = instructionList.get(j);
+                instruction.addEdges(interferenceGraph, next);
+                next = instruction;
+            }
         }
         return interferenceGraph;
     }
