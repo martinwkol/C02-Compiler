@@ -32,7 +32,7 @@ public class Union<R, S> {
         return r;
     }
 
-    public R second() {
+    public S second() {
         if (s == null) throw new RuntimeException("Union is not second");
         return s;
     }
