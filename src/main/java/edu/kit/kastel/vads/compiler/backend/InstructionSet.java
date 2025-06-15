@@ -50,6 +50,12 @@ public class InstructionSet {
             case MulNode mul -> newMul(mul);
             case DivNode div -> newDiv(div);
             case ModNode mod -> newMod(mod);
+            case CEqualsNode equals -> newEquals(equals);
+            case CUnequalsNode unequals -> newUnequals(unequals);
+            case CSmallerNode smaller -> newSmaller(smaller);
+            case CSmallerEqNode smallerEq -> newSmallerEq(smallerEq);
+            case CBiggerNode bigger -> newBigger(bigger);
+            case CBiggerEqNode biggerEq -> newBiggerEq(biggerEq);
             case ReturnNode ret -> newReturn(ret);
             case ConstIntNode constInt -> newConstInt(constInt);
             case JumpNode _, IfNode _ -> {} // handle jumps later
@@ -130,6 +136,30 @@ public class InstructionSet {
 
     private void newMod(ModNode mod) {
         addDivMod(mod);
+    }
+
+    private void newEquals(CEqualsNode equals) {
+        instructions.get(equals.block()).add(new EqualsInstruction(equals, registerAllocator));
+    }
+
+    private void newUnequals(CUnequalsNode unequals) {
+        instructions.get(unequals.block()).add(new UnequalsInstruction(unequals, registerAllocator));
+    }
+
+    private void newSmaller(CSmallerNode smaller) {
+        instructions.get(smaller.block()).add(new SmallerInstruction(smaller, registerAllocator));
+    }
+
+    private void newSmallerEq(CSmallerEqNode smallerEq) {
+        instructions.get(smallerEq.block()).add(new SmallerEqInstruction(smallerEq, registerAllocator));
+    }
+
+    private void newBigger(CBiggerNode bigger) {
+        instructions.get(bigger.block()).add(new BiggerInstruction(bigger, registerAllocator));
+    }
+
+    private void newBiggerEq(CBiggerEqNode biggerEq) {
+        instructions.get(biggerEq.block()).add(new BiggerEqInstruction(biggerEq, registerAllocator));
     }
 
     private void newReturn(ReturnNode ret) {
