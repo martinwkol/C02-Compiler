@@ -3,13 +3,13 @@ package edu.kit.kastel.vads.compiler.backend.instruction;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
-import edu.kit.kastel.vads.compiler.ir.node.ConstIntNode;
+import edu.kit.kastel.vads.compiler.ir.node.ConstBoolNode;
 
 public final class ConstBoolInstruction extends Instruction {
     private final Register destination;
-    private final int value;
+    private final boolean value;
 
-    public ConstBoolInstruction(ConstIntNode node, RegisterAllocator registerAllocator) {
+    public ConstBoolInstruction(ConstBoolNode node, RegisterAllocator registerAllocator) {
         super(true);
         destination = registerAllocator.get(node);
         value = node.value();
@@ -20,7 +20,7 @@ public final class ConstBoolInstruction extends Instruction {
         return registerMapping.get(destination);
     }
 
-    public int getValue() {
+    public boolean getValue() {
         return value;
     }
 }

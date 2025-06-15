@@ -57,6 +57,7 @@ public class InstructionSet {
             case CBiggerNode bigger -> newBigger(bigger);
             case CBiggerEqNode biggerEq -> newBiggerEq(biggerEq);
             case ReturnNode ret -> newReturn(ret);
+            case ConstBoolNode constBool -> newConstBool(constBool);
             case ConstIntNode constInt -> newConstInt(constInt);
             case JumpNode _, IfNode _ -> {} // handle jumps later
             case Phi _ -> {} // ignore phis for now
@@ -164,6 +165,10 @@ public class InstructionSet {
 
     private void newReturn(ReturnNode ret) {
         instructions.get(ret.block()).add(new ReturnInstruction(ret, registerAllocator));
+    }
+
+    private void newConstBool(ConstBoolNode constBool) {
+        instructions.get(constBool.block()).add(new ConstBoolInstruction(constBool, registerAllocator));
     }
 
     private void newConstInt(ConstIntNode constInt) {
