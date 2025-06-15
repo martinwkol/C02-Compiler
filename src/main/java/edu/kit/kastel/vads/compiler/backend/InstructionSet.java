@@ -54,6 +54,7 @@ public class InstructionSet {
             case BitAndNode bitAnd -> newBitAnd(bitAnd);
             case BitOrNode bitOr -> newBitOr(bitOr);
             case BitXorNode bitXor -> newBitXor(bitXor);
+            case BitNegationNode bitNegation -> newBitNegation(bitNegation);
 
             case CEqualsNode equals -> newEquals(equals);
             case CUnequalsNode unequals -> newUnequals(unequals);
@@ -61,6 +62,7 @@ public class InstructionSet {
             case CSmallerEqNode smallerEq -> newSmallerEq(smallerEq);
             case CBiggerNode bigger -> newBigger(bigger);
             case CBiggerEqNode biggerEq -> newBiggerEq(biggerEq);
+            case LogNegationNode logNegation -> newLogNegation(logNegation);
 
             case ConstBoolNode constBool -> newConstBool(constBool);
             case ConstIntNode constInt -> newConstInt(constInt);
@@ -158,6 +160,10 @@ public class InstructionSet {
         instructions.get(bitXor.block()).add(new BitXorInstruction(bitXor, registerAllocator));
     }
 
+    private void newBitNegation(BitNegationNode bitNegation) {
+        instructions.get(bitNegation.block()).add(new BitNegationInstruction(bitNegation, registerAllocator));
+    }
+
     private void newEquals(CEqualsNode equals) {
         instructions.get(equals.block()).add(new EqualsInstruction(equals, registerAllocator));
     }
@@ -180,6 +186,10 @@ public class InstructionSet {
 
     private void newBiggerEq(CBiggerEqNode biggerEq) {
         instructions.get(biggerEq.block()).add(new BiggerEqInstruction(biggerEq, registerAllocator));
+    }
+
+    private void newLogNegation(LogNegationNode logNegation) {
+        instructions.get(logNegation.block()).add(new LogNegationInstruction(logNegation, registerAllocator));
     }
 
     private void newReturn(ReturnNode ret) {

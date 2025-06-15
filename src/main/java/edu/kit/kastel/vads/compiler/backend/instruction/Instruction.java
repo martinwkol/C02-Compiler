@@ -13,7 +13,8 @@ import java.util.Set;
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
 public abstract sealed class Instruction permits
-        BinaryOperationInstruction, ConstIntInstruction, ConstBoolInstruction,
+        BinaryOperationInstruction, UnaryOperationInstruction,
+        ConstIntInstruction, ConstBoolInstruction,
         CtldInstruction, DivModInstruction,
         MoveInstruction,
         ReturnInstruction, JumpInstruction,
