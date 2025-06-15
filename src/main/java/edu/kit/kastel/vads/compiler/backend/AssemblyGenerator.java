@@ -75,6 +75,7 @@ public class AssemblyGenerator {
             case SmallerEqInstruction smallerEq -> addComparison(smallerEq, "jle");
             case BiggerInstruction bigger -> addComparison(bigger, "jg");
             case BiggerEqInstruction biggerEq -> addComparison(biggerEq, "jge");
+            case LogNegationInstruction logNegation -> addLogNegation(logNegation);
 
             case ConstIntInstruction constInt -> addConstInt(constInt);
             case ConstBoolInstruction constBool -> addConstBool(constBool);
@@ -151,6 +152,11 @@ public class AssemblyGenerator {
         move(source, physical(destination));
         builder.append(String.format("not %s\n", physical(destination)));
         moveToStackIfVirtual(destination);
+    }
+
+    private void addLogNegation(LogNegationInstruction logNegation) {
+        Register destination = logNegation.getDestination(registerMapping);
+        builder.append(String.format("subl $%d, %s\n", 1, destination));
     }
 
     private void addCtld() {
