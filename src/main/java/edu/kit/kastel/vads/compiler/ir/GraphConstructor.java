@@ -204,13 +204,13 @@ class GraphConstructor {
             throw new RuntimeException("Phi unreachable or in start block");
         }
         Set<Node> users = this.graph.successors(phi);
-        users.remove(phi); // Remove possible self-reference
         for (Node user : users) {
+            if (user == phi) continue;
             user.replacePredecessor(phi, same);
         }
 
         for (Node user : users) {
-            if (user instanceof Phi) {
+            if (user instanceof Phi && user != phi) {
                 tryRemoveTrivialPhi((Phi) user);
             }
         }
