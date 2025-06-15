@@ -64,7 +64,7 @@ public class AssemblyGenerator {
             case BitAndInstruction bitAnd -> addBinary(bitAnd,"and", true);
             case BitOrInstruction bitOr -> addBinary(bitOr,"or", true);
             case BitXorInstruction bitXor -> addBinary(bitXor,"xor", true);
-            case BitNegationInstruction bitNegation -> {} // TODO
+            case BitNegationInstruction bitNegation -> addBitNegation(bitNegation);
 
             case ShiftLeftInstruction shiftLeft -> addBinary(shiftLeft, "sal", false);
             case ShiftRightInstruction shiftRight -> addBinary(shiftRight, "sar", false);
@@ -135,6 +135,22 @@ public class AssemblyGenerator {
         builder.append(String.format("%s:\n", labelTrue));
         builder.append(String.format("movl $%d, %s\n", 1, destination.registerName()));
         builder.append(String.format("%s:\n", labelEnd));
+    }
+
+    private void addBitNegation(BitNegationInstruction bitNegation) {
+        Register destination = bitNegation.getDestination(registerMapping);
+        Register source = bitNegation.getSource(registerMapping);
+
+        if (destination == source) {
+            builder.append(String.format("not %s\n", destination));
+            return;
+        }
+        if (destination instanceof VirtualRegister) {
+            assignTempIfVirtual(destination);
+        }
+        move(source, physical(destination));
+        builder.append(String.format("not %s\n", physical(destination)));
+        moveToStackIfVirtual(destination);
     }
 
     private void addCtld() {
