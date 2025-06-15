@@ -2,23 +2,29 @@ package edu.kit.kastel.vads.compiler.backend;
 
 import edu.kit.kastel.vads.compiler.backend.instruction.*;
 import edu.kit.kastel.vads.compiler.backend.register.*;
+import edu.kit.kastel.vads.compiler.ir.node.Block;
 import org.jspecify.annotations.Nullable;
 
 public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();
+    private final InstructionSet instructionSet;
     private final RegisterMapping registerMapping;
     private @Nullable VirtualRegister storedInTemp;
     private final int maxStackUsage;
 
-    public AssemblyGenerator(InstructionSet block, RegisterMapping registerMapping, int maxStackUsage) {
+    public AssemblyGenerator(InstructionSet instructionSet, RegisterMapping registerMapping, int maxStackUsage) {
+        this.instructionSet = instructionSet;
         this.registerMapping = registerMapping;
         this.maxStackUsage = maxStackUsage;
         storedInTemp = null;
         addStarterCode();
         if (maxStackUsage > 0)
             builder.append(String.format("subq $%d, %%rsp\n", maxStackUsage));
-        for (Instruction instruction : block.getInstructions()) {
-            generateForInstruction(instruction);
+        for (Block block : instructionSet.getBlocks()) {
+            addLabel(block);
+            for (Instruction instruction : instructionSet.getInstructions(block)) {
+                generateForInstruction(instruction);
+            }
         }
     }
 
@@ -38,6 +44,13 @@ public class AssemblyGenerator {
                 "_main:\n");
     }
 
+    private void addLabel(Block block) {
+        if (!(instructionSet.getInstruction(block, 0) instanceof LabelInstruction label)) {
+            throw new RuntimeException("First instruction of block was not a label");
+        }
+        builder.append(String.format("%s:\n", label.label()));
+    }
+
     private void generateForInstruction(Instruction instruction) {
         switch (instruction) {
             case AddInstruction add -> binary(add, "addl", true);
@@ -45,9 +58,11 @@ public class AssemblyGenerator {
             case MulInstruction mul -> binary(mul, "imull", true);
             case CtldInstruction _ -> ctld();
             case DivModInstruction dm -> divMod(dm);
+            
             case ReturnInstruction r -> returnInstruction(r);
             case ConstIntInstruction c -> constInt(c);
             case MoveInstruction m -> move(m.getSource(registerMapping), m.getDestination(registerMapping));
+            case LabelInstruction _ -> {}
         }
     }
 

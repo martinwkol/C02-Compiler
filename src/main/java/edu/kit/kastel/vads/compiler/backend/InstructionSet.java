@@ -25,8 +25,20 @@ public class InstructionSet {
         handleJumps();
     }
 
+    public Block getBlock(int idx) {
+        return blocks.get(idx);
+    }
+
     public List<Block> getBlocks() {
         return blocks;
+    }
+
+    public Instruction getInstruction(Block block, int idx) {
+        return instructions.get(block).get(idx);
+    }
+
+    public List<Instruction> getInstructions(Block block) {
+        return instructions.get(block);
     }
 
     public void deduceLiveness() {
