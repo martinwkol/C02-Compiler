@@ -1,9 +1,6 @@
 package edu.kit.kastel.vads.compiler.ir;
 
-import edu.kit.kastel.vads.compiler.ir.node.Block;
-import edu.kit.kastel.vads.compiler.ir.node.DivNode;
-import edu.kit.kastel.vads.compiler.ir.node.ModNode;
-import edu.kit.kastel.vads.compiler.ir.node.Node;
+import edu.kit.kastel.vads.compiler.ir.node.*;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
@@ -12,6 +9,7 @@ import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
+import edu.kit.kastel.vads.compiler.util.Union;
 
 import java.net.http.HttpResponse;
 import java.util.ArrayDeque;
@@ -103,6 +101,24 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(BinaryOperationTree binaryOperationTree, SsaTranslation data) {
             pushSpan(binaryOperationTree);
+            Operator.OperatorType operatorType = binaryOperationTree.operatorType();
+            if (operatorType == Operator.OperatorType.LOGICAL_OR || operatorType == Operator.OperatorType.LOGICAL_AND) {
+                if (operatorType == Operator.OperatorType.LOGICAL_OR) {
+                    return Optional.of(ternaryCondition(
+                            binaryOperationTree.lhs(),
+                            Union.fromSecond(true),
+                            Union.fromFirst(binaryOperationTree.rhs()),
+                            data
+                    ));
+                } else {
+                    return Optional.of(ternaryCondition(
+                            binaryOperationTree.lhs(),
+                            Union.fromFirst(binaryOperationTree.rhs()),
+                            Union.fromSecond(false),
+                            data
+                    ));
+                }
+            }
             Node lhs = binaryOperationTree.lhs().accept(this, data).orElseThrow();
             Node rhs = binaryOperationTree.rhs().accept(this, data).orElseThrow();
             Node res = switch (binaryOperationTree.operatorType()) {
@@ -185,8 +201,8 @@ public class SsaTranslation {
 
             Optional<Node> result = Optional.of(ternaryCondition(
                 ternaryConditionTree.condition(),
-                ternaryConditionTree.caseTrue(),
-                ternaryConditionTree.caseFalse(),
+                Union.fromFirst(ternaryConditionTree.caseTrue()),
+                Union.fromFirst(ternaryConditionTree.caseFalse()),
                 data
             ));
 
@@ -391,8 +407,8 @@ public class SsaTranslation {
 
         private Node ternaryCondition(
                 ExpressionTree condition,
-                ExpressionTree caseTrue,
-                ExpressionTree caseFalse,
+                Union<ExpressionTree, Boolean> caseTrue,
+                Union<ExpressionTree, Boolean> caseFalse,
                 SsaTranslation data
         ) {
             Node conditionNode = condition.accept(this, data).orElseThrow();
@@ -406,11 +422,21 @@ public class SsaTranslation {
             data.constructor.sealBlock(falseEntry);
 
             data.constructor.setCurrentBlock(trueEntry);
-            Node resultTrue = caseTrue.accept(this, data).orElseThrow();
+            Node resultTrue;
+            if (caseTrue.isFirst()) {
+                resultTrue = caseTrue.first().accept(this, data).orElseThrow();
+            } else {
+                resultTrue = data.constructor.newConstBool(caseTrue.second());
+            }
             Block trueExit = data.constructor.currentBlock();
 
             data.constructor.setCurrentBlock(falseEntry);
-            Node resultFalse = caseFalse.accept(this, data).orElseThrow();
+            Node resultFalse;
+            if (caseFalse.isFirst()) {
+                resultFalse = caseFalse.first().accept(this, data).orElseThrow();
+            } else {
+                resultFalse = data.constructor.newConstBool(caseFalse.second());
+            }
             Block falseExit = data.constructor.currentBlock();
 
             Block ifExit = data.constructor.newBlock();
