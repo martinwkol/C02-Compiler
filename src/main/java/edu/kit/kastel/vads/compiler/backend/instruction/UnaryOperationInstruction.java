@@ -5,7 +5,7 @@ import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 import edu.kit.kastel.vads.compiler.ir.node.UnaryOperationNode;
 
-public sealed class UnaryOperationInstruction extends Instruction permits
+public abstract sealed class UnaryOperationInstruction extends Instruction permits
     BitNegationInstruction, LogNegationInstruction
 {
     private final Register destination;
