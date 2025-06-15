@@ -1,6 +1,8 @@
 package edu.kit.kastel.vads.compiler.ir.node;
 
 public abstract sealed class ExitNode extends Node permits JumpNode, IfNode, ReturnNode {
+    // TODO: Side effect
+
     public ExitNode(Block block, Node... predecessors) {
         super(block, predecessors);
     }
