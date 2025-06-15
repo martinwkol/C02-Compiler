@@ -68,6 +68,14 @@ class GraphConstructor {
         return this.optimizer.transform(new BitNegationNode(currentBlock(), node));
     }
 
+    public Node newShiftLeft(Node left, Node right) {
+        return this.optimizer.transform(new ShiftLeftNode(currentBlock(), left, right));
+    }
+
+    public Node newShiftRight(Node left, Node right) {
+        return this.optimizer.transform(new ShiftRightNode(currentBlock(), left, right));
+    }
+
     public Node newEquals(Node left, Node right) {
         return this.optimizer.transform(new CEqualsNode(currentBlock(), left, right));
     }

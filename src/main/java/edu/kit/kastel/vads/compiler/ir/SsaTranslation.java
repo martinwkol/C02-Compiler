@@ -114,6 +114,8 @@ public class SsaTranslation {
                 case BITWISE_AND -> data.constructor.newBitAnd(lhs, rhs);
                 case BITWISE_OR -> data.constructor.newBitOr(lhs, rhs);
                 case BITWISE_XOR -> data.constructor.newBitXor(lhs, rhs);
+                case SHIFT_LEFT -> data.constructor.newShiftLeft(lhs, rhs);
+                case SHIFT_RIGHT -> data.constructor.newShiftRight(lhs, rhs);
                 case EQUALITY -> data.constructor.newEquals(lhs, rhs);
                 case DISEQUALITY -> data.constructor.newUnequals(lhs, rhs);
                 case SMALLER -> data.constructor.newSmaller(lhs, rhs);
