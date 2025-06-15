@@ -22,6 +22,7 @@ public class InstructionSet {
         Set<Node> visited = new HashSet<>();
         visited.add(graph.endBlock());
         scan(graph.endBlock(), visited);
+        handlePhis(graph.endBlock());
     }
 
     public SequencedSet<Block> getBlocks() {
@@ -45,8 +46,29 @@ public class InstructionSet {
             case ModNode mod -> newMod(mod);
             case ReturnNode ret -> newReturn(ret);
             case ConstIntNode constInt -> newConstInt(constInt);
-            case Phi _ -> throw new UnsupportedOperationException("phi");
+            case Phi _ -> {} // ignore phis for now
             case ProjNode _, StartNode _ -> {}
+        }
+    }
+
+    private void handlePhis(Block endBlock) {
+        Set<Node> visited = new HashSet<>();
+        visited.add(endBlock);
+        handlePhisRecursive(endBlock, visited);
+    }
+
+    private void handlePhisRecursive(Node node, Set<Node> visited) {
+        for (Node predecessor : node.predecessors()) {
+            if (visited.add(predecessor)) {
+                handlePhisRecursive(predecessor, visited);
+            }
+        }
+        if (node instanceof Phi phi) {
+            for (Node operand : phi.operands()) {
+                instructions.get(operand.block()).add(new MoveInstruction(
+                    registerAllocator.get(operand), registerAllocator.get(phi)
+                ));
+            }
         }
     }
 
@@ -54,6 +76,7 @@ public class InstructionSet {
         if (blocks.contains(block)) return;
         blocks.add(block);
         instructions.put(block, new ArrayList<>());
+        instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
     }
 
     private void newAdd(AddNode add) {
@@ -82,6 +105,10 @@ public class InstructionSet {
 
     private void newConstInt(ConstIntNode constInt) {
         instructions.get(constInt.block()).add(new ConstIntInstruction(constInt, registerAllocator));
+    }
+
+    private void scanPhi(Phi phi) {
+
     }
 
     private void addDivMod(Node node) {
