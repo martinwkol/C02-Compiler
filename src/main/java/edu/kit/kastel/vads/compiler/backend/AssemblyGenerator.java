@@ -59,6 +59,15 @@ public class AssemblyGenerator {
             case CtldInstruction _ -> addCtld();
             case DivModInstruction dm -> addDivMod(dm);
 
+            case BitAndInstruction bitAnd -> addBinary(bitAnd,"and", true);
+            case BitOrInstruction bitOr -> addBinary(bitOr,"or", true);
+            case BitXorInstruction bitXor -> addBinary(bitXor,"xor", true);
+            case BitNegationInstruction bitNegation -> {} // TODO
+
+            case ShiftLeftInstruction shiftLeft -> addBinary(shiftLeft, "sal", false);
+            case ShiftRightInstruction shiftRight -> addBinary(shiftRight, "sar", false);
+
+
             case ConstIntInstruction constInt -> addConstInt(constInt);
             case ConstBoolInstruction constBool -> addConstBool(constBool);
 
@@ -108,7 +117,7 @@ public class AssemblyGenerator {
     }
 
 
-    
+
 
 
     private void addConstInt(ConstIntInstruction constIntInstruction) {
