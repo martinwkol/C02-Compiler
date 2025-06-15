@@ -53,20 +53,22 @@ public class AssemblyGenerator {
 
     private void generateForInstruction(Instruction instruction) {
         switch (instruction) {
-            case AddInstruction add -> binary(add, "addl", true);
-            case SubInstruction sub -> binary(sub, "subl", false);
-            case MulInstruction mul -> binary(mul, "imull", true);
-            case CtldInstruction _ -> ctld();
-            case DivModInstruction dm -> divMod(dm);
-            
-            case ReturnInstruction r -> returnInstruction(r);
-            case ConstIntInstruction c -> constInt(c);
+            case AddInstruction add -> addBinary(add, "addl", true);
+            case SubInstruction sub -> addBinary(sub, "subl", false);
+            case MulInstruction mul -> addBinary(mul, "imull", true);
+            case CtldInstruction _ -> addCtld();
+            case DivModInstruction dm -> addDivMod(dm);
+
+            case ConstIntInstruction constInt -> addConstInt(constInt);
+            case ConstBoolInstruction constBool -> addConstBool(constBool);
+
+            case ReturnInstruction ret -> addReturnInstruction(ret);
             case MoveInstruction m -> move(m.getSource(registerMapping), m.getDestination(registerMapping));
             case LabelInstruction _ -> {}
         }
     }
 
-    private void binary(BinaryOperationInstruction node, String assemblyInstructionName, boolean commutative) {
+    private void addBinary(BinaryOperationInstruction node, String assemblyInstructionName, boolean commutative) {
         Register destination = node.getDestination(registerMapping);
         Register left = node.getLeft(registerMapping);
         Register right = node.getRight(registerMapping);
@@ -94,18 +96,40 @@ public class AssemblyGenerator {
         moveToStackIfVirtual(destination);
     }
 
-    private void ctld() {
+    private void addCtld() {
         builder.append("cltd\n");
     }
 
-    private void divMod(DivModInstruction dm) {
+    private void addDivMod(DivModInstruction dm) {
         Register divisor = dm.getDivisor(registerMapping);
         moveToTempIfVirtual(divisor);
         builder.append(String.format("idivl %s\n", physical(divisor)));
         discardTemp();
     }
 
-    private void returnInstruction(ReturnInstruction returnInstruction) {
+
+    
+
+
+    private void addConstInt(ConstIntInstruction constIntInstruction) {
+        Register destination = constIntInstruction.getDestination(registerMapping);
+        assignTempIfVirtual(destination);
+        builder.append(String.format("movl $%d, %s\n", constIntInstruction.getValue(), physical(destination).registerName()));
+        moveToStackIfVirtual(destination);
+    }
+
+    private void addConstBool(ConstBoolInstruction constBool) {
+        Register destination = constBool.getDestination(registerMapping);
+        assignTempIfVirtual(destination);
+        int num = constBool.getValue() ? 1 : 0;
+        builder.append(String.format("movl $%d, %s\n", num, physical(destination).registerName()));
+        moveToStackIfVirtual(destination);
+    }
+
+
+
+
+    private void addReturnInstruction(ReturnInstruction returnInstruction) {
         Register returnRegister = returnInstruction.getReturnRegister(registerMapping);
         if (returnRegister != PhysicalRegister.Return) move(returnRegister, PhysicalRegister.Return);
         if (maxStackUsage > 0)
@@ -113,12 +137,8 @@ public class AssemblyGenerator {
         builder.append("ret\n");
     }
 
-    private void constInt(ConstIntInstruction constIntInstruction) {
-        Register destination = constIntInstruction.getDestination(registerMapping);
-        assignTempIfVirtual(destination);
-        builder.append(String.format("movl $%d, %s\n", constIntInstruction.getValue(), physical(destination).registerName()));
-        moveToStackIfVirtual(destination);
-    }
+
+
 
     private PhysicalRegister physical(Register register) {
         if (register instanceof PhysicalRegister physicalRegister) return physicalRegister;
