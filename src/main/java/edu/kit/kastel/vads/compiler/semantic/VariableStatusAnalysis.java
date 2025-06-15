@@ -108,7 +108,7 @@ class VariableStatusAnalysis  {
         }
 
         private static void checkUndeclared(NameTree name, VariableStatus data) {
-            if (!data.isDeclared(name.name())) {
+            if (data.isDeclared(name.name())) {
                 throw new SemanticException("Variable " + name + " is already declared");
             }
         }
