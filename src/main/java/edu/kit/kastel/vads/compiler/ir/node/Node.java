@@ -57,6 +57,14 @@ public sealed abstract class Node permits
         this.graph.registerSuccessor(node, this);
     }
 
+    public final void replacePredecessor(Node old, Node replacement) {
+        for (int i = 0; i < this.predecessors.size(); i++) {
+            if (this.predecessors.get(i) == old) {
+                setPredecessor(i, replacement);
+            }
+        }
+    }
+
     public final Node predecessor(int idx) {
         return this.predecessors.get(idx);
     }

@@ -192,11 +192,29 @@ class GraphConstructor {
     }
 
     Node tryRemoveTrivialPhi(Phi phi) {
-        // TODO: the paper shows how to remove trivial phis.
-        // as this is not a problem in Lab 1 and it is just
-        // a simplification, we recommend to implement this
-        // part yourself.
-        return phi;
+        Node same = null;
+        for (Node operand : phi.operands()) {
+            if (operand.equals(same) || operand.equals(phi)) continue;
+            if (same != null) return phi;
+            same = operand;
+        }
+        if (same == null) {
+            // Phi unreachable or in start block -> use dummy node
+            // return new ConstBoolNode(currentBlock(), false);
+            throw new RuntimeException("Phi unreachable or in start block");
+        }
+        Set<Node> users = this.graph.successors(phi);
+        users.remove(phi); // Remove possible self-reference
+        for (Node user : users) {
+            user.replacePredecessor(phi, same);
+        }
+
+        for (Node user : users) {
+            if (user instanceof Phi) {
+                tryRemoveTrivialPhi((Phi) user);
+            }
+        }
+        return same;
     }
 
     void sealBlock(Block block) {
