@@ -71,6 +71,10 @@ public class Parser {
                 case KeywordType.IF -> parseIf();
                 case KeywordType.WHILE -> parseWhile();
                 case KeywordType.FOR -> parseFor();
+                default -> null;
+            };
+            if (statement != null) return statement; // No semicolon required
+            statement = switch (keyword.type()) {
                 case KeywordType.BREAK -> parseBreak();
                 case KeywordType.CONTINUE -> parseContinue();
                 case KeywordType.RETURN -> parseReturn();
