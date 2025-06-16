@@ -27,6 +27,7 @@ public class AssemblyGenerator {
             for (Instruction instruction : instructionSet.getInstructions(block)) {
                 generateForInstruction(instruction);
             }
+            builder.append('\n');
         }
     }
 
