@@ -1,10 +1,6 @@
 package edu.kit.kastel.vads.compiler.backend.register;
 
-import edu.kit.kastel.vads.compiler.ir.node.Block;
-import edu.kit.kastel.vads.compiler.ir.node.Node;
-import edu.kit.kastel.vads.compiler.ir.node.ProjNode;
-import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
-import edu.kit.kastel.vads.compiler.ir.node.StartNode;
+import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -52,6 +48,10 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
     }
 
     private static boolean needsRegister(Node node) {
-        return !(node instanceof ProjNode || node instanceof StartNode || node instanceof Block || node instanceof ReturnNode);
+        return !(
+            node instanceof ProjNode || node instanceof StartNode ||
+            node instanceof Block || node instanceof ReturnNode ||
+            node instanceof InvalidNode
+        );
     }
 }
