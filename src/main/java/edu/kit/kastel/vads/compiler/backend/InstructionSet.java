@@ -165,7 +165,8 @@ public class InstructionSet {
             case Phi _                          -> {} // ignore phis for now
             case ProjNode _, StartNode _        -> {}
 
-            case InvalidNode _                  -> throw new UnsupportedOperationException("Invalid node");
+            case InvalidNode _                  -> {} // tolerate it for now
+            //case InvalidNode _                  -> throw new UnsupportedOperationException("Invalid node");
         }
     }
 
