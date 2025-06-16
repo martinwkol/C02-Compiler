@@ -185,8 +185,8 @@ public class SsaTranslation {
             }
 
             Block ifExit = data.constructor.newBlock();
-            trueExit.setJumpExitNode(ifExit);
-            falseExit.setJumpExitNode(ifExit);
+            if (trueExit.exitNode() == null) trueExit.setJumpExitNode(ifExit);
+            if (falseExit.exitNode() == null) falseExit.setJumpExitNode(ifExit);
             data.constructor.sealBlock(ifExit);
             data.constructor.setCurrentBlock(ifExit);
 
