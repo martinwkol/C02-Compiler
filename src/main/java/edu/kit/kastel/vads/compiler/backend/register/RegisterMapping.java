@@ -1,5 +1,6 @@
 package edu.kit.kastel.vads.compiler.backend.register;
 
+import edu.kit.kastel.vads.compiler.ir.node.Node;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Comparator;
@@ -8,6 +9,15 @@ import java.util.Map;
 
 public class RegisterMapping {
     private final Map<Register, Register> mapping;
+
+    public static RegisterMapping identity(RegisterAllocator registerAllocator) {
+        RegisterMapping registerMapping = new RegisterMapping();
+        for (Node node : registerAllocator.nodes()) {
+            Register register = registerAllocator.get(node);
+            registerMapping.mapping.put(register, register);
+        }
+        return registerMapping;
+    }
 
     public RegisterMapping() {
         mapping = new HashMap<>();
