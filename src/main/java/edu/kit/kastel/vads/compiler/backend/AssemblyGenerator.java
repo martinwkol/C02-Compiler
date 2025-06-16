@@ -165,19 +165,19 @@ public class AssemblyGenerator {
     }
 
     private void addJump(JumpAlwaysInstruction jump) {
-        builder.append(String.format("jmp %s\n", jump.target()));
+        builder.append(String.format("jmp %s\n", instructionSet.getLabel(jump.target())));
     }
 
     private void addJumpZero(JumpZeroInstruction jump) {
         Register destination = jump.register(registerMapping);
         builder.append(String.format("cmp $%d, %s\n", 0, destination.registerName()));
-        builder.append(String.format("jz %s\n", jump.target()));
+        builder.append(String.format("jz %s\n", instructionSet.getLabel(jump.target())));
     }
 
     private void addJumpNonZero(JumpNonZeroInstruction jump) {
         Register destination = jump.register(registerMapping);
         builder.append(String.format("cmp $%d, %s\n", 0, destination.registerName()));
-        builder.append(String.format("jnz %s\n", jump.target()));
+        builder.append(String.format("jnz %s\n", instructionSet.getLabel(jump.target())));
     }
 
     private void addCtld() {

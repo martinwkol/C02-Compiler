@@ -41,6 +41,10 @@ public class InstructionSet {
         return instructions.get(block);
     }
 
+    public String getLabel(Block block) {
+        return ((LabelInstruction) instructions.get(block).getFirst()).label();
+    }
+
     public void deduceLiveness() {
         for (Block block : blocks) {
             for (Instruction instruction : instructions.get(block)) {
