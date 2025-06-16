@@ -201,8 +201,7 @@ class GraphConstructor {
         }
         if (same == null) {
             // Phi unreachable or in start block -> use dummy node
-            // return new ConstBoolNode(currentBlock(), false);
-            throw new RuntimeException("Phi unreachable or in start block");
+            return new InvalidNode(phi.block());
         }
         Set<Node> users = this.graph.successors(phi);
         for (Node user : users) {

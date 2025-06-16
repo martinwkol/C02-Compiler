@@ -131,6 +131,8 @@ public class InstructionSet {
             case JumpNode _, IfNode _           -> {} // handle jumps later
             case Phi _                          -> {} // ignore phis for now
             case ProjNode _, StartNode _        -> {}
+            
+            case InvalidNode _                  -> throw new UnsupportedOperationException("Invalid node");
         }
     }
 
