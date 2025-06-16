@@ -107,7 +107,7 @@ public class IrPrinter {
         }
 
         switch (node) {
-            case Block block                    -> {}
+            case Block block                    -> visitExitNode(block, visited);
             case AddNode add                    -> binary(add, "add");
             case SubNode sub                    -> binary(sub, "sub");
             case MulNode mul                    -> binary(mul, "mul");
@@ -143,29 +143,33 @@ public class IrPrinter {
         }
     }
 
+    private void visitExitNode(Block block, Set<Node> visited) {
+        if (block.exitNode() != null) scanInstructionsRecursive(block.exitNode(), visited);
+    }
+
     private void binary(BinaryOperationNode node, String opName) {
         builder.get(node.block()).append(String.format(
                 "%s = %s %s %s\n",
-                registerAllocator.get(node).registerName(),
+                registerAllocator.get(node),
                 opName,
-                registerAllocator.get(node.left()).registerName(),
-                registerAllocator.get(node.right()).registerName()
+                registerAllocator.get(node.left()),
+                registerAllocator.get(node.right())
         ));
     }
 
     private void unary(UnaryOperationNode node, String opName) {
         builder.get(node.block()).append(String.format(
                 "%s = %s %s\n",
-                registerAllocator.get(node).registerName(),
+                registerAllocator.get(node),
                 opName,
-                registerAllocator.get(node.node()).registerName()
+                registerAllocator.get(node.node())
         ));
     }
 
     private void constInt(ConstIntNode constInt) {
         builder.get(constInt.block()).append(String.format(
                 "%s = int %d\n",
-                registerAllocator.get(constInt).registerName(),
+                registerAllocator.get(constInt),
                 constInt.value()
         ));
     }
@@ -173,7 +177,7 @@ public class IrPrinter {
     private void constBool(ConstBoolNode constBool) {
         builder.get(constBool.block()).append(String.format(
                 "%s = int %s\n",
-                registerAllocator.get(constBool).registerName(),
+                registerAllocator.get(constBool),
                 constBool.value() ? "true" : "false"
         ));
     }
@@ -187,9 +191,9 @@ public class IrPrinter {
 
     private void newPhi(Phi phi) {
         StringBuilder pb = builder.get(phi.block());
-        pb.append(String.format("%s = phi( ", registerAllocator.get(phi).registerName()));
+        pb.append(String.format("%s = phi( ", registerAllocator.get(phi)));
         for (Node operand : phi.operands()) {
-            pb.append(String.format("%s ", registerAllocator.get(operand).registerName()));
+            pb.append(String.format("%s ", registerAllocator.get(operand)));
         }
         pb.append(")\n");
     }
@@ -208,7 +212,7 @@ public class IrPrinter {
     private void ifNode(IfNode ifN) {
         builder.get(ifN.block()).append(String.format(
                 "if %s then %d else %d\n",
-                registerAllocator.get(ifN.condition()).registerName(),
+                registerAllocator.get(ifN.condition()),
                 blocks.indexOf(ifN.trueEntry()),
                 blocks.indexOf(ifN.falseEntry())
         ));
