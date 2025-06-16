@@ -1,18 +1,15 @@
 package edu.kit.kastel.vads.compiler.backend.instruction;
 
-import edu.kit.kastel.vads.compiler.ir.node.Block;
+public final class JumpInstruction extends Instruction {
+    private final LabelInstruction target;
 
-public abstract sealed class JumpInstruction extends Instruction permits
-        JumpAlwaysInstruction, JumpZeroInstruction, JumpNonZeroInstruction
-{
-    private final Block target;
-
-    public JumpInstruction(Block target) {
+    public JumpInstruction(LabelInstruction target) {
         super(false);
         this.target = target;
+        addNonImmediateSuccessor(target);
     }
 
-    public Block target() {
+    public LabelInstruction target() {
         return this.target;
     }
 }

@@ -17,7 +17,7 @@ public abstract sealed class Instruction permits
         ConstIntInstruction, ConstBoolInstruction,
         CtldInstruction, DivModInstruction,
         MoveInstruction,
-        ReturnInstruction, JumpInstruction,
+        ReturnInstruction, JumpInstruction, ConditionalJumpInstruction,
         LabelInstruction
 {
     protected final Set<Register> live = new HashSet<>();

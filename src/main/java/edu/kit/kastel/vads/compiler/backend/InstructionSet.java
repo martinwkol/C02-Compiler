@@ -202,7 +202,7 @@ public class InstructionSet {
             ExitNode exitNode = block.exitNode();
             if (exitNode instanceof JumpNode jump) {
                 if (i == blocks.size() - 1 || jump.targetBlock() == blocks.get(i + 1)) continue;
-                instructions.get(block).add(newJumpAlways(jump.targetBlock()));
+                instructions.get(block).add(newJump(jump.targetBlock()));
             }
             else if (exitNode instanceof IfNode ifNode) {
                 if (i < blocks.size() - 1) {
@@ -216,7 +216,7 @@ public class InstructionSet {
                     }
                 }
                 instructions.get(block).add(newJumpZero(ifNode.falseEntry(), ifNode.condition()));
-                instructions.get(block).add(newJumpAlways(ifNode.trueEntry()));
+                instructions.get(block).add(newJump(ifNode.trueEntry()));
             }
         }
     }
@@ -313,26 +313,22 @@ public class InstructionSet {
         instructions.get(constInt.block()).add(new ConstIntInstruction(constInt, registerAllocator));
     }
 
-    private JumpInstruction newJumpAlways(Block target) {
-        JumpInstruction jump = new JumpAlwaysInstruction(target);
-        jump.addNonImmediateSuccessor(instructions.get(target).getFirst());
-        return jump;
+    private JumpInstruction newJump(Block target) {
+        return new JumpInstruction((LabelInstruction) instructions.get(target).getFirst());
     }
 
-    private JumpInstruction newJumpZero(Block target, Node condition) {
-        JumpInstruction jump = new JumpZeroInstruction(
-                target, registerAllocator.get(condition)
+    private JumpZeroInstruction newJumpZero(Block target, Node condition) {
+        return new JumpZeroInstruction(
+                (LabelInstruction) instructions.get(target).getFirst(),
+                registerAllocator.get(condition)
         );
-        jump.addNonImmediateSuccessor(instructions.get(target).getFirst());
-        return jump;
     }
 
-    private JumpInstruction newJumpNonZero(Block target, Node condition) {
-        JumpInstruction jump = new JumpNonZeroInstruction(
-                target, registerAllocator.get(condition)
+    private JumpNonZeroInstruction newJumpNonZero(Block target, Node condition) {
+        return new JumpNonZeroInstruction(
+                (LabelInstruction) instructions.get(target).getFirst(),
+                registerAllocator.get(condition)
         );
-        jump.addNonImmediateSuccessor(instructions.get(target).getFirst());
-        return jump;
     }
 
     private void addDivMod(Node node) {

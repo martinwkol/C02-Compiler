@@ -83,7 +83,7 @@ public class AssemblyGenerator {
             case ConstIntInstruction constInt -> addConstInt(constInt);
             case ConstBoolInstruction constBool -> addConstBool(constBool);
 
-            case JumpAlwaysInstruction jump -> addJump(jump);
+            case JumpInstruction jump -> addJump(jump);
             case JumpZeroInstruction jumpZero -> addJumpZero(jumpZero);
             case JumpNonZeroInstruction jumpNonZero -> addJumpNonZero(jumpNonZero);
 
@@ -178,20 +178,20 @@ public class AssemblyGenerator {
         builder.append(String.format("subl $%d, %s\n", 1, destination));
     }
 
-    private void addJump(JumpAlwaysInstruction jump) {
-        builder.append(String.format("jmp %s\n", instructionSet.getLabel(jump.target())));
+    private void addJump(JumpInstruction jump) {
+        builder.append(String.format("jmp %s\n", jump.target().label()));
     }
 
     private void addJumpZero(JumpZeroInstruction jump) {
         Register destination = jump.register(registerMapping);
         builder.append(String.format("cmp $%d, %s\n", 0, destination.registerName()));
-        builder.append(String.format("jz %s\n", instructionSet.getLabel(jump.target())));
+        builder.append(String.format("jz %s\n", jump.target().label()));
     }
 
     private void addJumpNonZero(JumpNonZeroInstruction jump) {
         Register destination = jump.register(registerMapping);
         builder.append(String.format("cmp $%d, %s\n", 0, destination.registerName()));
-        builder.append(String.format("jnz %s\n", instructionSet.getLabel(jump.target())));
+        builder.append(String.format("jnz %s\n", jump.target().label()));
     }
 
     private void addCtld() {
