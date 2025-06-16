@@ -4,7 +4,7 @@ public final class ReturnNode extends ExitNode {
     public static final int SIDE_EFFECT = 0;
     public static final int RESULT = 1;
     public ReturnNode(Block block, Node sideEffect, Node result) {
-        super(block, result);
+        super(block, sideEffect, result);
     }
 
     @Override
