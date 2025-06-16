@@ -20,6 +20,7 @@ public class InstructionSet {
 
     public InstructionSet(IrGraph graph, VirtualRegisterAllocator registerAllocator) {
         this.registerAllocator = registerAllocator;
+        allocateRegisters(graph.endBlock());
         scan(graph.endBlock());
         handlePhis(graph.endBlock());
         handleJumps();
@@ -86,6 +87,24 @@ public class InstructionSet {
         return interferenceGraph;
     }
 
+    private void allocateRegisters(Block endBlock) {
+        Set<Node> visited = new HashSet<>();
+        visited.add(endBlock);
+        allocateRegistersRecursive(endBlock, visited);
+    }
+
+    private void allocateRegistersRecursive(Node node, Set<Node> visited) {
+        for (Node predecessor : node.predecessors()) {
+            if (visited.add(predecessor)) {
+                allocateRegistersRecursive(predecessor, visited);
+            }
+        }
+        registerAllocator.allocateRegister(node);
+        if (node instanceof Block block) {
+            if (block.exitNode() != null) allocateRegistersRecursive(block.exitNode(), visited);
+        }
+    }
+
     private void scan(Block endBlock) {
         Set<Node> visited = new HashSet<>();
         visited.add(endBlock);
@@ -98,7 +117,6 @@ public class InstructionSet {
                 scanRecursive(predecessor, visited);
             }
         }
-        registerAllocator.allocateRegister(node);
 
         switch (node) {
             case Block block                    -> scanBlock(block, visited);
@@ -131,7 +149,7 @@ public class InstructionSet {
             case JumpNode _, IfNode _           -> {} // handle jumps later
             case Phi _                          -> {} // ignore phis for now
             case ProjNode _, StartNode _        -> {}
-            
+
             case InvalidNode _                  -> throw new UnsupportedOperationException("Invalid node");
         }
     }
