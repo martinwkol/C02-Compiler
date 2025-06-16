@@ -266,11 +266,25 @@ public class InstructionSet {
     }
 
     private void newShiftLeft(ShiftLeftNode shiftLeft) {
-        instructions.get(shiftLeft.block()).add(new ShiftLeftInstruction(shiftLeft, registerAllocator));
+        instructions.get(shiftLeft.block()).add(new MoveInstruction(
+                registerAllocator.get(shiftLeft.right()),
+                PhysicalRegister.ShiftRegister
+        ));
+        instructions.get(shiftLeft.block()).add(new ShiftLeftInstruction(
+                registerAllocator.get(shiftLeft.left()),
+                registerAllocator.get(shiftLeft)
+        ));
     }
 
     private void newShiftRight(ShiftRightNode shiftRight) {
-        instructions.get(shiftRight.block()).add(new ShiftRightInstruction(shiftRight, registerAllocator));
+        instructions.get(shiftRight.block()).add(new MoveInstruction(
+                registerAllocator.get(shiftRight.right()),
+                PhysicalRegister.ShiftRegister
+        ));
+        instructions.get(shiftRight.block()).add(new ShiftRightInstruction(
+                registerAllocator.get(shiftRight.left()),
+                registerAllocator.get(shiftRight)
+        ));
     }
 
     private void newEquals(CEqualsNode equals) {

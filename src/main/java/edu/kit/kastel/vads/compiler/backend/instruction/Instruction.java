@@ -14,6 +14,7 @@ import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipPr
 
 public abstract sealed class Instruction permits
         BinaryOperationInstruction, UnaryOperationInstruction,
+        ShiftInstruction,
         ConstIntInstruction, ConstBoolInstruction,
         CtldInstruction, DivModInstruction,
         MoveInstruction,

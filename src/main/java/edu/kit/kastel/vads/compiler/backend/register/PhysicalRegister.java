@@ -27,6 +27,8 @@ public enum PhysicalRegister implements Register {
     public static final PhysicalRegister Quotient = A;
     public static final PhysicalRegister Remainder = D;
 
+    public static final PhysicalRegister ShiftRegister = C;
+
     public static final PhysicalRegister[] All = {
             A, B, C, D, SI, DI, BP, SP, R8, R9, R10, R11, R12, R13, R14, R15, R16
     };
@@ -50,6 +52,11 @@ public enum PhysicalRegister implements Register {
     @Override
     public String registerName() {
         return "%" + name4bytes;
+    }
+
+    @Override
+    public String registerName1Byte() {
+        return "%" + name1byte;
     }
 
     @Override

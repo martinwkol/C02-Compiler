@@ -69,8 +69,8 @@ public class AssemblyGenerator {
             case BitXorInstruction bitXor -> addBinary(bitXor,"xor", true);
             case BitNegationInstruction bitNegation -> addBitNegation(bitNegation);
 
-            case ShiftLeftInstruction shiftLeft -> addBinary(shiftLeft, "sal", false);
-            case ShiftRightInstruction shiftRight -> addBinary(shiftRight, "sar", false);
+            case ShiftLeftInstruction shiftLeft -> addShift(shiftLeft, "sal");
+            case ShiftRightInstruction shiftRight -> addShift(shiftRight, "sar");
 
             case EqualsInstruction equals -> addComparison(equals, "je");
             case UnequalsInstruction unequals -> addComparison(unequals, "jne");
@@ -155,6 +155,27 @@ public class AssemblyGenerator {
         builder.append(String.format("%s:\n", labelTrue));
         builder.append(String.format("movl $%d, %s\n", 1, destination.registerName()));
         builder.append(String.format("%s:\n", labelEnd));
+    }
+
+    public void addShift(ShiftInstruction shift, String shiftAsmInstruction) {
+        Register destination = shift.getDestination(registerMapping);
+        Register source = shift.getSource(registerMapping);
+
+        if (source != destination) {
+            if (source instanceof VirtualRegister && destination instanceof VirtualRegister) {
+                move(source, PhysicalRegister.Temp);
+                move(PhysicalRegister.Temp, destination);
+            } else {
+                move(source, destination);
+            }
+        }
+
+        builder.append(String.format(
+                "%s %s, %s\n",
+                shiftAsmInstruction,
+                PhysicalRegister.ShiftRegister.registerName1Byte(),
+                destination.registerName()
+        ));
     }
 
     private void addBitNegation(BitNegationInstruction bitNegation) {

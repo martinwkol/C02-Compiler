@@ -37,6 +37,14 @@ public sealed abstract class BinaryOperationNode extends Node permits
         return a.predecessor(LEFT) == b.predecessor(RIGHT) && a.predecessor(RIGHT) == b.predecessor(LEFT);
     }
 
+    public Node left() {
+        return this.predecessor(LEFT);
+    }
+
+    public Node right() {
+        return this.predecessor(RIGHT);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof BinaryOperationNode binOp)) {

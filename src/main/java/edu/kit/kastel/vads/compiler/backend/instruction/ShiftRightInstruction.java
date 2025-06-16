@@ -1,10 +1,9 @@
 package edu.kit.kastel.vads.compiler.backend.instruction;
 
-import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
-import edu.kit.kastel.vads.compiler.ir.node.ShiftRightNode;
+import edu.kit.kastel.vads.compiler.backend.register.Register;
 
-public final class ShiftRightInstruction extends BinaryOperationInstruction {
-    public ShiftRightInstruction(ShiftRightNode node, RegisterAllocator registerAllocator) {
-        super(node, registerAllocator);
+public final class ShiftRightInstruction extends ShiftInstruction {
+    public ShiftRightInstruction(Register source, Register destination) {
+        super(source, destination);
     }
 }
