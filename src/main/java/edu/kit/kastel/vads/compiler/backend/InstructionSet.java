@@ -14,14 +14,14 @@ import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipPr
 
 public class InstructionSet {
     private final List<Block> blocks = new ArrayList<>();
-    private final Set<Block> blockVisited = new HashSet<>();
     private final Map<Block, List<Instruction>> instructions = new HashMap<>();
     private final VirtualRegisterAllocator registerAllocator;
 
     public InstructionSet(IrGraph graph, VirtualRegisterAllocator registerAllocator) {
         this.registerAllocator = registerAllocator;
         allocateRegisters(graph.endBlock());
-        scan(graph.endBlock());
+        scanBlocks(graph.endBlock());
+        scanInstructions(graph.endBlock());
         handlePhis(graph.endBlock());
         handleJumps();
     }
@@ -105,21 +105,36 @@ public class InstructionSet {
         }
     }
 
-    private void scan(Block endBlock) {
+    private void scanBlocks(Block endBlock) {
         Set<Node> visited = new HashSet<>();
         visited.add(endBlock);
-        scanRecursive(endBlock, visited);
+        scanBlocksRecursive(endBlock, visited);
     }
 
-    private void scanRecursive(Node node, Set<Node> visited) {
+    private void scanBlocksRecursive(Node node, Set<Node> visited) {
         for (Node predecessor : node.predecessors()) {
             if (visited.add(predecessor)) {
-                scanRecursive(predecessor, visited);
+                scanBlocksRecursive(predecessor, visited);
+            }
+        }
+        if (node instanceof Block block) newBlock(block, visited);
+    }
+
+    private void scanInstructions(Block endBlock) {
+        Set<Node> visited = new HashSet<>();
+        visited.add(endBlock);
+        scanInstructionsRecursive(endBlock, visited);
+    }
+
+    private void scanInstructionsRecursive(Node node, Set<Node> visited) {
+        for (Node predecessor : node.predecessors()) {
+            if (visited.add(predecessor)) {
+                scanInstructionsRecursive(predecessor, visited);
             }
         }
 
         switch (node) {
-            case Block block                    -> scanBlock(block, visited);
+            case Block block                    -> visitExitNode(block, visited);
             case AddNode add                    -> newAdd(add);
             case SubNode sub                    -> newSub(sub);
             case MulNode mul                    -> newMul(mul);
@@ -154,13 +169,8 @@ public class InstructionSet {
         }
     }
 
-    private void scanBlock(Block block, Set<Node> visited) {
-        if (blockVisited.contains(block)) return;
-        blocks.add(block);
-        blockVisited.add(block);
-        instructions.put(block, new ArrayList<>());
-        instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
-        if (block.exitNode() != null) scanRecursive(block.exitNode(), visited);
+    private void visitExitNode(Block block, Set<Node> visited) {
+        if (block.exitNode() != null) scanInstructionsRecursive(block.exitNode(), visited);
     }
 
     private void handlePhis(Block endBlock) {
@@ -209,6 +219,14 @@ public class InstructionSet {
                 instructions.get(block).add(newJumpAlways(ifNode.trueEntry()));
             }
         }
+    }
+
+    private void newBlock(Block block, Set<Node> visited) {
+        blocks.add(block);
+        instructions.put(block, new ArrayList<>());
+        instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
+        // maybe unnecessary
+        if (block.exitNode() != null) scanBlocksRecursive(block.exitNode(), visited);
     }
 
     private void newAdd(AddNode add) {
