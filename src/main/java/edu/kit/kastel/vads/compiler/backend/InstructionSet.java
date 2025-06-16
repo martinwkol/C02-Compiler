@@ -187,6 +187,7 @@ public class InstructionSet {
         }
         if (node instanceof Phi phi) {
             for (Node operand : phi.operands()) {
+                if (!registerAllocator.isAllocated(operand)) continue;
                 instructions.get(operand.block()).add(new MoveInstruction(
                     registerAllocator.get(operand), registerAllocator.get(phi)
                 ));

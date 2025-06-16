@@ -21,6 +21,10 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
         return register;
     }
 
+    public boolean isAllocated(Node node) {
+        return registers.containsKey(node);
+    }
+
     @Override
     public VirtualRegister get(Node node) {
         VirtualRegister register = registers.get(node);

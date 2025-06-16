@@ -32,6 +32,13 @@ public class SemanticAnalysis {
                 new RecursivePostorderVisitor<>(new ReturnAnalysis()),
                 new ReturnAnalysis.ReturnState()
         );
+        this.program.accept(
+                new RecursiveVisitor<>(
+                        new BreakContinueAnalysis.PreorderVisitor(),
+                        new BreakContinueAnalysis.PostorderVisitor()
+                ),
+                new BreakContinueAnalysis.Counter()
+        );
     }
 
 }
