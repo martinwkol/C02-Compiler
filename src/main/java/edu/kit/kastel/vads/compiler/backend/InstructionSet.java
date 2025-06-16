@@ -97,7 +97,7 @@ public class InstructionSet {
         registerAllocator.allocateRegister(node);
 
         switch (node) {
-            case Block block                    -> scanBlock(block);
+            case Block block                    -> scanBlock(block, visited);
             case AddNode add                    -> newAdd(add);
             case SubNode sub                    -> newSub(sub);
             case MulNode mul                    -> newMul(mul);
@@ -128,6 +128,15 @@ public class InstructionSet {
             case Phi _                          -> {} // ignore phis for now
             case ProjNode _, StartNode _        -> {}
         }
+    }
+
+    private void scanBlock(Block block, Set<Node> visited) {
+        if (blockVisited.contains(block)) return;
+        blocks.add(block);
+        blockVisited.add(block);
+        instructions.put(block, new ArrayList<>());
+        instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
+        if (block.exitNode() != null) scanRecursive(block.exitNode(), visited);
     }
 
     private void handlePhis(Block endBlock) {
@@ -174,14 +183,6 @@ public class InstructionSet {
                 instructions.get(block).add(newJumpAlways(ifNode.trueEntry()));
             }
         }
-    }
-
-    private void scanBlock(Block block) {
-        if (blockVisited.contains(block)) return;
-        blocks.add(block);
-        blockVisited.add(block);
-        instructions.put(block, new ArrayList<>());
-        instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
     }
 
     private void newAdd(AddNode add) {
