@@ -444,7 +444,7 @@ public class SsaTranslation {
             data.constructor.sealBlock(ifExit);
             data.constructor.setCurrentBlock(ifExit);
 
-            return data.constructor.newPhiWithOperands(resultTrue, resultFalse);
+            return data.constructor.newPhiWithOperands(ifExit, resultTrue, resultFalse);
         }
 
         private Node projResultDivMod(SsaTranslation data, Node divMod) {
