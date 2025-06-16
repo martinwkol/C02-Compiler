@@ -137,10 +137,9 @@ public class AssemblyGenerator {
         Register left = binOp.getLeft(registerMapping);
         Register right = binOp.getRight(registerMapping);
         if (left instanceof VirtualRegister && right instanceof VirtualRegister) {
-            moveToTempIfVirtual(left);
             // cmp first second computes second - first => first = right, second = left
-            builder.append(String.format("cmp %s, %s\n", physical(right).registerName(), left.registerName()));
-            discardTemp();
+            move(right, PhysicalRegister.Temp);
+            builder.append(String.format("cmp %s, %s\n", PhysicalRegister.Temp.registerName(), left.registerName()));
         }
         else {
             // cmp first second computes second - first => first = right, second = left
