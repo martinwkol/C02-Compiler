@@ -97,10 +97,10 @@ public class RecursiveVisitor<T, R> implements Visitor<T, R> {
             r = forTree.initializer().accept(this, accumulate(data, r));
         }
         r = forTree.condition().accept(this, accumulate(data, r));
+        r = forTree.body().accept(this, accumulate(data, r));
         if (forTree.step() != null) {
             r = forTree.step().accept(this, accumulate(data, r));
         }
-        r = forTree.body().accept(this, accumulate(data, r));
         r = this.postorderVisitor.visit(forTree, accumulate(data, r));
         return r;
     }
