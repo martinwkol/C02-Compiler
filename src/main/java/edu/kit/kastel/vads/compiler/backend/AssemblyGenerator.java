@@ -56,6 +56,8 @@ public class AssemblyGenerator {
 
     private void generateForInstruction(Instruction instruction) {
         switch (instruction) {
+            case MoveInstruction moveInstruction -> addMove(moveInstruction);
+
             case AddInstruction add -> addBinary(add, "addl", true);
             case SubInstruction sub -> addBinary(sub, "subl", false);
             case MulInstruction mul -> addBinary(mul, "imull", true);
@@ -87,8 +89,18 @@ public class AssemblyGenerator {
 
 
             case ReturnInstruction ret -> addReturnInstruction(ret);
-            case MoveInstruction m -> move(m.getSource(registerMapping), m.getDestination(registerMapping));
             case LabelInstruction _ -> {}
+        }
+    }
+
+    private void addMove(MoveInstruction moveInstruction) {
+        Register destination = moveInstruction.getDestination(registerMapping);
+        Register source = moveInstruction.getSource(registerMapping);
+        if (source instanceof VirtualRegister && destination instanceof VirtualRegister) {
+            move(source, PhysicalRegister.Temp);
+            move(PhysicalRegister.Temp, destination);
+        } else {
+            move(source, destination);
         }
     }
 
