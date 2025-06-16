@@ -161,6 +161,8 @@ public class InstructionSet {
                     registerAllocator.get(operand), registerAllocator.get(phi)
                 ));
             }
+        } else if (node instanceof Block block) {
+            if (block.exitNode() != null) handlePhisRecursive(block.exitNode(), visited);
         }
     }
 
