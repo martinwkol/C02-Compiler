@@ -21,6 +21,10 @@ class VariableStatusAnalysis  {
         private final SortedMap<Name, Boolean> initialized = new TreeMap<>();
         private final Stack<List<Name>> blocks = new Stack<>();
 
+        public VariableStatus() {
+            blocks.add(new ArrayList<>());
+        }
+
         public void declare(Name name) {
             Boolean previous = initialized.put(name, false);
             assert previous == null;
