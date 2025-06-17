@@ -62,6 +62,12 @@ class VariableStatusAnalysis  {
         }
 
         @Override
+        public Unit visit(ForTree forTree, VariableStatus data) {
+            data.newBlock();
+            return NoOpVisitor.super.visit(forTree, data);
+        }
+
+        @Override
         public Unit visit(AssignmentTree assignmentTree, VariableStatus data) {
             switch (assignmentTree.lValue()) {
                 case LValueIdentTree(var name) -> {
@@ -116,6 +122,12 @@ class VariableStatusAnalysis  {
         public Unit visit(BlockTree blockTree, VariableStatus data) {
             data.endBlock();
             return NoOpVisitor.super.visit(blockTree, data);
+        }
+
+        @Override
+        public Unit visit(ForTree forTree, VariableStatus data) {
+            data.endBlock();
+            return NoOpVisitor.super.visit(forTree, data);
         }
     }
 }
