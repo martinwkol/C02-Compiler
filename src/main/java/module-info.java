@@ -5,4 +5,5 @@ module edu.kit.kastel.vads.compiler {
     requires org.jspecify;
     requires java.xml;
     requires java.net.http;
+    requires java.desktop;
 }
