@@ -33,6 +33,10 @@ class GraphConstructor {
         return new StartNode(currentBlock());
     }
 
+    public Node newAssign(Node node) {
+        return this.optimizer.transform(new AssignNode(currentBlock(), node));
+    }
+
     public Node newAdd(Node left, Node right) {
         return this.optimizer.transform(new AddNode(currentBlock(), left, right));
     }

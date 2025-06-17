@@ -108,6 +108,8 @@ public class IrPrinter {
 
         switch (node) {
             case Block block                    -> visitExitNode(block, visited);
+
+            case AssignNode assign              -> unary(assign, "");
             case AddNode add                    -> binary(add, "add");
             case SubNode sub                    -> binary(sub, "sub");
             case MulNode mul                    -> binary(mul, "mul");

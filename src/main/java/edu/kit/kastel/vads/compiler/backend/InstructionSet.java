@@ -135,6 +135,8 @@ public class InstructionSet {
 
         switch (node) {
             case Block block                    -> visitExitNode(block, visited);
+
+            case AssignNode assign              -> newAssign(assign);
             case AddNode add                    -> newAdd(add);
             case SubNode sub                    -> newSub(sub);
             case MulNode mul                    -> newMul(mul);
@@ -229,6 +231,13 @@ public class InstructionSet {
         instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
         // maybe unnecessary
         if (block.exitNode() != null) scanBlocksRecursive(block.exitNode(), visited);
+    }
+
+    private void newAssign(AssignNode assign) {
+        instructions.get(assign.block()).add(new MoveInstruction(
+                registerAllocator.get(assign.node()),
+                registerAllocator.get(assign)
+        ));
     }
 
     private void newAdd(AddNode add) {

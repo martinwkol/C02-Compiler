@@ -89,6 +89,8 @@ public class SsaTranslation {
                     Node rhs = assignmentTree.expression().accept(this, data).orElseThrow();
                     if (desugar != null) {
                         rhs = desugar.apply(data.readVariable(name.name(), data.currentBlock()), rhs);
+                    } else { // normal assign
+                        rhs = data.constructor.newAssign(rhs);
                     }
                     data.writeVariable(name.name(), data.currentBlock(), rhs);
                 }
