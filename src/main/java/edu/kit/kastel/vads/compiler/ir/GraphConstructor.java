@@ -172,21 +172,21 @@ class GraphConstructor {
     private Node readVariableRecursive(Name variable, Block block) {
         Node val;
         if (!this.sealedBlocks.contains(block)) {
-            val = newPhi(block);
+            val = newPhi(currentBlock());
             this.incompletePhis.computeIfAbsent(block, _ -> new HashMap<>()).put(variable, (Phi) val);
         } else if (block.predecessors().size() == 1) {
             val = readVariable(variable, block.predecessors().getFirst().block());
         } else {
-            val = newPhi(block);
+            val = newPhi(currentBlock());
             writeVariable(variable, block, val);
-            val = addPhiOperands(variable, (Phi) val);
+            val = addPhiOperands(variable, (Phi) val, block);
         }
         writeVariable(variable, block, val);
         return val;
     }
 
-    Node addPhiOperands(Name variable, Phi phi) {
-        for (Node pred : phi.block().predecessors()) {
+    Node addPhiOperands(Name variable, Phi phi, Block block) {
+        for (Node pred : block.predecessors()) {
             phi.appendOperand(readVariable(variable, pred.block()));
         }
         return tryRemoveTrivialPhi(phi);
@@ -219,7 +219,7 @@ class GraphConstructor {
 
     void sealBlock(Block block) {
         for (Map.Entry<Name, Phi> entry : this.incompletePhis.getOrDefault(block, Map.of()).entrySet()) {
-            addPhiOperands(entry.getKey(), entry.getValue());
+            addPhiOperands(entry.getKey(), entry.getValue(), block);
         }
         this.sealedBlocks.add(block);
     }
@@ -247,22 +247,22 @@ class GraphConstructor {
     private Node readSideEffectRecursive(Block block) {
         Node val;
         if (!this.sealedBlocks.contains(block)) {
-            val = newPhi(block);
+            val = newPhi(currentBlock());
             Phi old = this.incompleteSideEffectPhis.put(block, (Phi) val);
             assert old == null : "double readSideEffectRecursive for " + block;
         } else if (block.predecessors().size() == 1) {
             val = readSideEffect(block.predecessors().getFirst().block());
         } else {
-            val = newPhi(block);
+            val = newPhi(currentBlock());
             writeSideEffect(block, val);
-            val = addPhiOperands((Phi) val);
+            val = addPhiOperands((Phi) val, block);
         }
         writeSideEffect(block, val);
         return val;
     }
 
-    Node addPhiOperands(Phi phi) {
-        for (Node pred : phi.block().predecessors()) {
+    Node addPhiOperands(Phi phi, Block block) {
+        for (Node pred : block.predecessors()) {
             phi.appendOperand(readSideEffect(pred.block()));
         }
         return tryRemoveTrivialPhi(phi);
