@@ -8,9 +8,7 @@ import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
 import edu.kit.kastel.vads.compiler.util.Pair;
 import org.jspecify.annotations.Nullable;
 
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Stack;
+import java.util.*;
 
 /// Checks that variables are
 /// - declared before assignment
@@ -20,40 +18,35 @@ import java.util.Stack;
 class VariableStatusAnalysis  {
 
     static class VariableStatus {
-        private final LinkedHashSet<Name> declared;
-        private final LinkedHashSet<Name> initialized;
-        private final Stack<Pair<Integer, Integer>> blockStart;
+        private final SortedMap<Name, Boolean> initialized = new TreeMap<>();
+        private final Stack<List<Name>> blocks = new Stack<>();
 
-        public VariableStatus() {
-            declared = new LinkedHashSet<>();
-            initialized = new LinkedHashSet<>();
-            blockStart = new Stack<>();
+        public void declare(Name name) {
+            Boolean previous = initialized.put(name, false);
+            assert previous == null;
+            blocks.getLast().add(name);
         }
 
-        public boolean declare(Name name) {
-            return declared.add(name);
-        }
-
-        public boolean initialize(Name name) {
-            return initialized.add(name);
+        public void initialize(Name name) {
+            Boolean previous = initialized.put(name, true);
+            assert previous != null;
         }
 
         public boolean isDeclared(Name name) {
-            return declared.contains(name);
+            return initialized.containsKey(name);
         }
 
         public boolean isInitialized(Name name) {
-            return initialized.contains(name);
+            return initialized.getOrDefault(name, false);
         }
 
         public void newBlock() {
-            blockStart.push(new Pair<>(declared.size(), initialized.size()));
+            blocks.push(new ArrayList<>());
         }
 
         public void endBlock() {
-            Pair<Integer, Integer> start = blockStart.pop();
-            while (declared.size() > start.first()) declared.removeLast();
-            while (initialized.size() > start.second()) initialized.removeLast();
+            for (Name name : blocks.getLast()) initialized.remove(name);
+            blocks.pop();
         }
     };
 
