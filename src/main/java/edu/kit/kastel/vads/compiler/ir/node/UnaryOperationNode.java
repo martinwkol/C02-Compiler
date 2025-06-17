@@ -1,6 +1,8 @@
 package edu.kit.kastel.vads.compiler.ir.node;
 
-public abstract sealed class UnaryOperationNode extends Node permits LogNegationNode, BitNegationNode {
+public abstract sealed class UnaryOperationNode extends Node permits
+        AssignNode, LogNegationNode, BitNegationNode
+{
     public static int NODE = 0;
 
     public UnaryOperationNode(Block block, Node node) {
