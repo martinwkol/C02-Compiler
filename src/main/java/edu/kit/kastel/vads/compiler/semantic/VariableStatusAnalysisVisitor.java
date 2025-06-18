@@ -100,10 +100,10 @@ class VariableStatusAnalysisVisitor implements Visitor<VariableStatus, VariableS
             cloned = forTree.initializer().accept(this, cloned);
         }
         cloned = forTree.condition().accept(this, cloned);
+        cloned = forTree.body().accept(this, cloned);
         if (forTree.step() != null) {
-            cloned = forTree.step().accept(this, cloned);
+            forTree.step().accept(this, cloned);
         }
-        forTree.body().accept(this, cloned);
         return data;
     }
 
