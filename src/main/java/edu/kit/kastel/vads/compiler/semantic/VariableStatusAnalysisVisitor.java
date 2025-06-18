@@ -153,6 +153,9 @@ class VariableStatusAnalysisVisitor implements Visitor<VariableStatus, VariableS
 
     @Override
     public VariableStatus visit(ProgramTree programTree, VariableStatus data) {
+        for (FunctionTree functionTree : programTree.topLevelTrees()) {
+            data = functionTree.accept(this, data);
+        }
         return data;
     }
 
