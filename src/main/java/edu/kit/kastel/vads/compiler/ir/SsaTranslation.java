@@ -79,6 +79,8 @@ public class SsaTranslation {
                 case ASSIGN_BITWISE_AND -> data.constructor::newBitAnd;
                 case ASSIGN_BITWISE_OR -> data.constructor::newBitOr;
                 case ASSIGN_BITWISE_XOR -> data.constructor::newBitXor;
+                case ASSIGN_SHIFT_LEFT -> data.constructor::newShiftLeft;
+                case ASSIGN_SHIFT_RIGHT -> data.constructor::newShiftRight;
                 case ASSIGN -> null;
                 default ->
                     throw new IllegalArgumentException("not an assignment operator " + assignmentTree.operator());
