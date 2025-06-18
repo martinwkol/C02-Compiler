@@ -19,13 +19,7 @@ public class SemanticAnalysis {
                 new RecursivePostorderVisitor<>(new IntegerLiteralRangeAnalysis()),
                 new Namespace<>()
         );
-        this.program.accept(
-                new RecursiveVisitor<>(
-                        new VariableStatusAnalysis.PreorderVisitor(),
-                        new VariableStatusAnalysis.PostorderVisitor()
-                ),
-                new VariableStatusAnalysis.VariableStatus()
-        );
+        this.program.accept(new VariableStatusAnalysisVisitor(), new VariableStatus());
         this.program.accept(
                 new RecursivePostorderVisitor<>(new TypeAnalysis()),
                 new TypeAnalysis.TypeMapping()
