@@ -95,16 +95,18 @@ class VariableStatusAnalysisVisitor implements Visitor<VariableStatus, VariableS
 
     @Override
     public VariableStatus visit(ForTree forTree, VariableStatus data) {
-        VariableStatus cloned = VariableStatus.clonedFrom(data);
+        VariableStatus clonedHeader = VariableStatus.clonedFrom(data);
         if (forTree.initializer() != null) {
-            cloned = forTree.initializer().accept(this, cloned);
+            clonedHeader = forTree.initializer().accept(this, clonedHeader);
         }
-        cloned = forTree.condition().accept(this, cloned);
-        cloned = forTree.body().accept(this, cloned);
+        clonedHeader = forTree.condition().accept(this, clonedHeader);
+        VariableStatus clonedBody = forTree.body().accept(this, VariableStatus.clonedFrom(clonedHeader));
         if (forTree.step() != null) {
-            forTree.step().accept(this, cloned);
+            forTree.step().accept(this, clonedBody);
         }
-        return data;
+        clonedHeader.declared = data.declared;
+        clonedHeader.initialized.retainAll(data.declared);
+        return clonedHeader;
     }
 
     @Override
