@@ -28,7 +28,7 @@ public final class Block extends Node {
     }
 
     private ExitNode setExitNode(ExitNode exitNode) {
-        if (this.exitNode != null) throw new RuntimeException("Attempted to override already existing exitNode");
+        if (this.exitNode != null) return exitNode; // The first set counts
         this.exitNode = exitNode;
         this.exitNode.updateBlockPredecessors();
         return exitNode;
