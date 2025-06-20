@@ -427,7 +427,9 @@ public class SsaTranslation {
             data.constructor.setCurrentBlock(trueEntry);
             Node resultTrue;
             if (caseTrue.isFirst()) {
-                resultTrue = caseTrue.first().accept(this, data).orElseThrow();
+                resultTrue = data.constructor.newAssign(
+                        caseTrue.first().accept(this, data).orElseThrow()
+                );
             } else {
                 resultTrue = data.constructor.newConstBool(caseTrue.second());
             }
@@ -436,7 +438,9 @@ public class SsaTranslation {
             data.constructor.setCurrentBlock(falseEntry);
             Node resultFalse;
             if (caseFalse.isFirst()) {
-                resultFalse = caseFalse.first().accept(this, data).orElseThrow();
+                resultFalse = data.constructor.newAssign(
+                        caseFalse.first().accept(this, data).orElseThrow()
+                );
             } else {
                 resultFalse = data.constructor.newConstBool(caseFalse.second());
             }
