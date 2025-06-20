@@ -22,11 +22,13 @@ public class VirtualRegisterAllocator implements RegisterAllocator {
     }
 
     public boolean isAllocated(Node node) {
+        while (node instanceof ProjNode) node = node.predecessor(ProjNode.IN);
         return registers.containsKey(node);
     }
 
     @Override
     public VirtualRegister get(Node node) {
+        while (node instanceof ProjNode) node = node.predecessor(ProjNode.IN);
         VirtualRegister register = registers.get(node);
         if (register == null) throw new NullPointerException("Node not assigned a register");
         return register;
