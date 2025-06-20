@@ -173,23 +173,26 @@ class GraphConstructor {
     }
 
     Node readVariable(Name variable, Block block) {
+        return readVariable(variable, block, currentBlock());
+    }
+
+    private Node readVariable(Name variable, Block block, Block origin) {
         Node node = this.currentDef.getOrDefault(variable, Map.of()).get(block);
         if (node != null) {
             return node;
         }
-        return readVariableRecursive(variable, block);
+        return readVariableRecursive(variable, block, origin);
     }
 
-
-    private Node readVariableRecursive(Name variable, Block block) {
+    private Node readVariableRecursive(Name variable, Block block, Block origin) {
         Node val;
         if (!this.sealedBlocks.contains(block)) {
-            val = newPhi(currentBlock());
+            val = newPhi(origin);
             this.incompletePhis.computeIfAbsent(block, _ -> new HashMap<>()).put(variable, (Phi) val);
         } else if (block.predecessors().size() == 1) {
-            val = readVariable(variable, block.predecessors().getFirst().block());
+            val = readVariable(variable, block.predecessors().getFirst().block(), origin);
         } else {
-            val = newPhi(currentBlock());
+            val = newPhi(origin);
             writeVariable(variable, block, val);
             val = addPhiOperands(variable, (Phi) val, block);
         }
@@ -199,7 +202,7 @@ class GraphConstructor {
 
     Node addPhiOperands(Name variable, Phi phi, Block block) {
         for (Node pred : block.predecessors()) {
-            phi.appendOperand(readVariable(variable, pred.block()));
+            phi.appendOperand(readVariable(variable, pred.block(), pred.block()));
         }
         return tryRemoveTrivialPhi(phi);
     }
