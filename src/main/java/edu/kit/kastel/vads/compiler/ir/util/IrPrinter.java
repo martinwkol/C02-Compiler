@@ -195,6 +195,7 @@ public class IrPrinter {
         StringBuilder pb = builder.get(phi.block());
         pb.append(String.format("%s = phi( ", registerAllocator.get(phi)));
         for (Node operand : phi.operands()) {
+            if (operand instanceof ProjNode) operand = operand.predecessor(ProjNode.IN);
             pb.append(String.format("%s ", registerAllocator.get(operand)));
         }
         pb.append(")\n");
