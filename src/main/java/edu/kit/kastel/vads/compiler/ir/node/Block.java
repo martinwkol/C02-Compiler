@@ -15,19 +15,7 @@ public final class Block extends Node {
         return exitNode;
     }
 
-    public ExitNode setJumpExitNode(Block targetBlock) {
-        return setExitNode(new JumpNode(this, targetBlock));
-    }
-
-    public ExitNode setIfExitNode(Node condition, Block trueEntry, Block falseEntry) {
-        return setExitNode(new IfNode(this, condition, trueEntry, falseEntry));
-    }
-
-    public ExitNode setReturnExitNode(Node sideEffect, Node result) {
-        return setExitNode(new ReturnNode(this, sideEffect, result));
-    }
-
-    private ExitNode setExitNode(ExitNode exitNode) {
+    public ExitNode setExitNode(ExitNode exitNode) {
         if (this.exitNode != null) return exitNode; // The first set counts
         this.exitNode = exitNode;
         this.exitNode.updateBlockPredecessors();

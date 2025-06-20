@@ -108,10 +108,6 @@ class GraphConstructor {
         return this.optimizer.transform(new LogNegationNode(currentBlock(), node));
     }
 
-    public Node newReturn(Node result) {
-        return this.currentBlock.setReturnExitNode(readCurrentSideEffect(), result);
-    }
-
     public Node newConstInt(int value) {
         // TODO: :(
         // always move const into start block, this allows better deduplication
@@ -141,6 +137,18 @@ class GraphConstructor {
 
     public Block newBlock() {
         return new Block(this.graph());
+    }
+
+    public void setJumpExitNode(Block block, Block targetBlock) {
+        block.setExitNode(new JumpNode(block, readSideEffect(block), targetBlock));
+    }
+
+    public void setIfExitNode(Block block, Node condition, Block caseTrue, Block caseFalse) {
+        block.setExitNode(new IfNode(block, readSideEffect(block), condition, caseTrue, caseFalse));
+    }
+
+    public void setReturnExitNode(Block block, Node result) {
+        block.setExitNode(new ReturnNode(block, readSideEffect(block), result));
     }
 
     public Phi newPhi(Block block) {

@@ -173,7 +173,7 @@ public class SsaTranslation {
             Block trueEntry = data.constructor.newBlock();
             Block falseEntry = data.constructor.newBlock();
 
-            beforeIf.setIfExitNode(condition, trueEntry, falseEntry);
+            data.constructor.setIfExitNode(beforeIf, condition, trueEntry, falseEntry);
             data.constructor.sealBlock(trueEntry);
             data.constructor.sealBlock(falseEntry);
 
@@ -189,8 +189,8 @@ public class SsaTranslation {
             }
 
             Block ifExit = data.constructor.newBlock();
-            if (trueExit.exitNode() == null) trueExit.setJumpExitNode(ifExit);
-            if (falseExit.exitNode() == null) falseExit.setJumpExitNode(ifExit);
+            if (trueExit.exitNode() == null) data.constructor.setJumpExitNode(trueExit, ifExit);
+            if (falseExit.exitNode() == null) data.constructor.setJumpExitNode(falseExit, ifExit);
             data.constructor.sealBlock(ifExit);
             data.constructor.setCurrentBlock(ifExit);
 
@@ -223,12 +223,12 @@ public class SsaTranslation {
             Block loopExit = data.constructor.newBlock();
 
             // cannot seal while header yet
-            beforeWhile.setJumpExitNode(whileHeader);
+            data.constructor.setJumpExitNode(beforeWhile, whileHeader);
 
             loopStack.push(new LoopInfo(whileHeader, loopExit));
             data.constructor.setCurrentBlock(whileHeader);
             Node condition = whileTree.condition().accept(this, data).orElseThrow();
-            whileHeader.setIfExitNode(condition, bodyEntry, loopExit);
+            data.constructor.setIfExitNode(whileHeader, condition, bodyEntry, loopExit);
             data.constructor.sealBlock(bodyEntry);
 
             data.constructor.setCurrentBlock(bodyEntry);
@@ -236,7 +236,7 @@ public class SsaTranslation {
             Block bodyExit = data.constructor.currentBlock();
             // might already be set if block ends with break or continue
             if (bodyExit.exitNode() == null) {
-                bodyExit.setJumpExitNode(whileHeader);
+                data.constructor.setJumpExitNode(bodyExit, whileHeader);
             }
             loopStack.pop();
 
@@ -262,12 +262,12 @@ public class SsaTranslation {
             Block bodyExit = data.constructor.newBlock();
             Block loopExit = data.constructor.newBlock();
 
-            beforeLoop.setJumpExitNode(loopHeader);
+            data.constructor.setJumpExitNode(beforeLoop, loopHeader);
 
             loopStack.push(new LoopInfo(bodyExit, loopExit));
             data.constructor.setCurrentBlock(loopHeader);
             Node condition = forTree.condition().accept(this, data).orElseThrow();
-            loopHeader.setIfExitNode(condition, bodyEntry, loopExit);
+            data.constructor.setIfExitNode(loopHeader, condition, bodyEntry, loopExit);
             data.constructor.sealBlock(bodyEntry);
 
             data.constructor.setCurrentBlock(bodyEntry);
@@ -275,14 +275,14 @@ public class SsaTranslation {
             Block preExitBody = data.constructor.currentBlock();
             // might already be set if block ends with break or continue
             if (preExitBody.exitNode() == null) {
-                preExitBody.setJumpExitNode(bodyExit);
+                data.constructor.setJumpExitNode(preExitBody, bodyExit);
             }
 
             data.constructor.setCurrentBlock(bodyExit);
             if (forTree.step() != null) {
                 forTree.step().accept(this, data);
             }
-            bodyExit.setJumpExitNode(loopHeader);
+            data.constructor.setJumpExitNode(bodyExit, loopHeader);
             loopStack.pop();
 
             data.constructor.sealBlock(bodyExit);
@@ -301,7 +301,7 @@ public class SsaTranslation {
             if (loopStack.isEmpty()) {
                 throw new RuntimeException("break statement outside of loop");
             }
-            data.constructor.currentBlock().setJumpExitNode(loopStack.getLast().loopExit());
+            data.constructor.setJumpExitNode(data.constructor.currentBlock(), loopStack.getLast().loopExit());
 
             popSpan();
             return NOT_AN_EXPRESSION;
@@ -314,7 +314,7 @@ public class SsaTranslation {
             if (loopStack.isEmpty()) {
                 throw new RuntimeException("continue statement outside of loop");
             }
-            data.constructor.currentBlock().setJumpExitNode(loopStack.getLast().bodyExit());
+            data.constructor.setJumpExitNode(data.constructor.currentBlock(), loopStack.getLast().bodyExit());
 
             popSpan();
             return NOT_AN_EXPRESSION;
@@ -398,7 +398,7 @@ public class SsaTranslation {
         public Optional<Node> visit(ReturnTree returnTree, SsaTranslation data) {
             pushSpan(returnTree);
             Node node = returnTree.expression().accept(this, data).orElseThrow();
-            Node ret = data.constructor.newReturn(node);
+            data.constructor.setReturnExitNode(data.constructor.currentBlock(), node);
             popSpan();
             return NOT_AN_EXPRESSION;
         }
@@ -420,7 +420,7 @@ public class SsaTranslation {
             Block trueEntry = data.constructor.newBlock();
             Block falseEntry = data.constructor.newBlock();
 
-            beforeIf.setIfExitNode(conditionNode, trueEntry, falseEntry);
+            data.constructor.setIfExitNode(beforeIf, conditionNode, trueEntry, falseEntry);
             data.constructor.sealBlock(trueEntry);
             data.constructor.sealBlock(falseEntry);
 
@@ -443,8 +443,8 @@ public class SsaTranslation {
             Block falseExit = data.constructor.currentBlock();
 
             Block ifExit = data.constructor.newBlock();
-            trueExit.setJumpExitNode(ifExit);
-            falseExit.setJumpExitNode(ifExit);
+            data.constructor.setJumpExitNode(trueExit, ifExit);
+            data.constructor.setJumpExitNode(falseExit, ifExit);
             data.constructor.sealBlock(ifExit);
             data.constructor.setCurrentBlock(ifExit);
 
