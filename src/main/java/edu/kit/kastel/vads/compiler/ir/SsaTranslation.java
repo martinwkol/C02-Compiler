@@ -301,7 +301,7 @@ public class SsaTranslation {
             if (loopStack.isEmpty()) {
                 throw new RuntimeException("break statement outside of loop");
             }
-            data.constructor.setJumpExitNode(data.constructor.currentBlock(), loopStack.getLast().loopExit());
+            data.constructor.setJumpExitNode(data.constructor.currentBlock(), loopStack.peek().loopExit());
 
             popSpan();
             return NOT_AN_EXPRESSION;
@@ -314,7 +314,7 @@ public class SsaTranslation {
             if (loopStack.isEmpty()) {
                 throw new RuntimeException("continue statement outside of loop");
             }
-            data.constructor.setJumpExitNode(data.constructor.currentBlock(), loopStack.getLast().bodyExit());
+            data.constructor.setJumpExitNode(data.constructor.currentBlock(), loopStack.peek().bodyExit());
 
             popSpan();
             return NOT_AN_EXPRESSION;
