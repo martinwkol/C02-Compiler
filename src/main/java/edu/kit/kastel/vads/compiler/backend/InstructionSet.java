@@ -277,23 +277,15 @@ public class InstructionSet {
     }
 
     private void newShiftLeft(ShiftLeftNode shiftLeft) {
-        instructions.get(shiftLeft.block()).add(new MoveInstruction(
-                registerAllocator.get(shiftLeft.right()),
-                PhysicalRegister.ShiftRegister
-        ));
+        addShiftMoveInstructions(shiftLeft.block(), shiftLeft.right(), shiftLeft.left(), shiftLeft);
         instructions.get(shiftLeft.block()).add(new ShiftLeftInstruction(
-                registerAllocator.get(shiftLeft.left()),
                 registerAllocator.get(shiftLeft)
         ));
     }
 
     private void newShiftRight(ShiftRightNode shiftRight) {
-        instructions.get(shiftRight.block()).add(new MoveInstruction(
-                registerAllocator.get(shiftRight.right()),
-                PhysicalRegister.ShiftRegister
-        ));
+        addShiftMoveInstructions(shiftRight.block(), shiftRight.right(), shiftRight.left(), shiftRight);
         instructions.get(shiftRight.block()).add(new ShiftRightInstruction(
-                registerAllocator.get(shiftRight.left()),
                 registerAllocator.get(shiftRight)
         ));
     }
@@ -354,6 +346,17 @@ public class InstructionSet {
                 (LabelInstruction) instructions.get(target).getFirst(),
                 registerAllocator.get(condition)
         );
+    }
+
+    private void addShiftMoveInstructions(Block block, Node shift, Node source, Node destination) {
+        instructions.get(block).add(new MoveInstruction(
+                registerAllocator.get(shift),
+                PhysicalRegister.ShiftRegister
+        ));
+        instructions.get(block).add(new MoveInstruction(
+                registerAllocator.get(source),
+                registerAllocator.get(destination)
+        ));
     }
 
     private void addDivMod(Node node) {

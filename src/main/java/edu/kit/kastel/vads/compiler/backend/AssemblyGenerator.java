@@ -159,17 +159,6 @@ public class AssemblyGenerator {
 
     public void addShift(ShiftInstruction shift, String shiftAsmInstruction) {
         Register destination = shift.getDestination(registerMapping);
-        Register source = shift.getSource(registerMapping);
-
-        if (source != destination) {
-            if (source instanceof VirtualRegister && destination instanceof VirtualRegister) {
-                move(source, PhysicalRegister.Temp);
-                move(PhysicalRegister.Temp, destination);
-            } else {
-                move(source, destination);
-            }
-        }
-
         builder.append(String.format(
                 "%s %s, %s\n",
                 shiftAsmInstruction,

@@ -9,22 +9,16 @@ public abstract sealed class ShiftInstruction extends Instruction permits
     ShiftLeftInstruction, ShiftRightInstruction
 {
     private final Register destination;
-    private final Register source;
 
-    public ShiftInstruction(Register source, Register destination) {
+    public ShiftInstruction(Register destination) {
         super(true);
         this.destination = destination;
-        this.source = source;
         addDefines(destination);
-        addUses(source);
+        addUses(destination);
         addUses(PhysicalRegister.ShiftRegister);
     }
 
     public Register getDestination(RegisterMapping registerMapping) {
         return registerMapping.get(destination);
-    }
-
-    public Register getSource(RegisterMapping registerMapping) {
-        return registerMapping.get(source);
     }
 }
