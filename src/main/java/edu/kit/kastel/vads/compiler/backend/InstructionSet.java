@@ -235,7 +235,7 @@ public class InstructionSet {
 
     private void newAssign(AssignNode assign) {
         instructions.get(assign.block()).add(new MoveInstruction(
-                registerAllocator.get(assign.node()),
+                registerAllocator.get(predecessorSkipProj(assign, AssignNode.NODE)),
                 registerAllocator.get(assign)
         ));
     }
