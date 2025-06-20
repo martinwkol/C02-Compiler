@@ -12,6 +12,9 @@ public class RegisterMapping {
 
     public static RegisterMapping identity(RegisterAllocator registerAllocator) {
         RegisterMapping registerMapping = new RegisterMapping();
+        for (PhysicalRegister physicalRegister : PhysicalRegister.All) {
+            registerMapping.mapping.put(physicalRegister, physicalRegister);
+        }
         for (Node node : registerAllocator.nodes()) {
             Register register = registerAllocator.get(node);
             registerMapping.mapping.put(register, register);

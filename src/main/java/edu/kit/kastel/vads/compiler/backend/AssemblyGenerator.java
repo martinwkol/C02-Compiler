@@ -292,8 +292,9 @@ public class AssemblyGenerator {
     }
 
     private void move(Register from, Register to) {
-        if (!(from instanceof PhysicalRegister) && !(to instanceof PhysicalRegister))
+        if (!(from instanceof PhysicalRegister) && !(to instanceof PhysicalRegister)) {
             throw new IllegalArgumentException("At least on register must be physical");
+        }
         if (from.equals(to)) return;
         builder.append(
             String.format(
