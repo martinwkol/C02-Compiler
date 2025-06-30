@@ -25,25 +25,30 @@ public class Parser {
     }
 
     public ProgramTree parseProgram() {
-        ProgramTree programTree = new ProgramTree(List.of(parseFunction()));
+        List<FunctionTree> functions = new ArrayList<>();
+        while (this.tokenSource.hasMore() && this.tokenSource.peek().isKeyword(KeywordType.INT, KeywordType.BOOL)) {
+            functions.add(parseFunction());
+        }
         if (this.tokenSource.hasMore()) {
             throw new ParseException("expected end of input but got " + this.tokenSource.peek());
         }
-        return programTree;
+        return new ProgramTree(functions);
     }
 
     private FunctionTree parseFunction() {
-        Keyword returnType = this.tokenSource.expectKeyword(KeywordType.INT);
+        Keyword returnType = this.tokenSource.expectKeyword(KeywordType.INT, KeywordType.BOOL);
         Identifier identifier = this.tokenSource.expectIdentifier();
-        if (!identifier.value().equals("main")) {
-            throw new ParseException("expected main function but got " + identifier);
-        }
         this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
+        List<ParameterTree> parameters = new ArrayList<>();
+        while (this.tokenSource.peek().isKeyword(KeywordType.INT, KeywordType.BOOL)) {
+            parameters.add(parseParameter());
+        }
         this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
         BlockTree body = parseBlock();
         return new FunctionTree(
             new TypeTree(BasicType.INT, returnType.span()),
             name(identifier),
+            parameters,
             body
         );
     }
@@ -96,6 +101,17 @@ public class Parser {
         } else {
             return parseSimple();
         }
+    }
+
+    private ParameterTree parseParameter() {
+        Keyword keyword = this.tokenSource.expectKeyword(KeywordType.INT, KeywordType.BOOL);
+        Identifier ident = this.tokenSource.expectIdentifier();
+        BasicType basicType = switch (keyword.type()) {
+            case KeywordType.INT -> BasicType.INT;
+            case KeywordType.BOOL -> BasicType.BOOL;
+            default -> throw new ParseException("Keyword " + keyword.type() + " does not represent a type");
+        };
+        return new ParameterTree(new TypeTree(basicType, keyword.span()), name(ident));
     }
 
     private StatementTree parseDeclaration() {
