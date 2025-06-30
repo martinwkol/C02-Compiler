@@ -21,6 +21,8 @@ public interface Visitor<T, R> {
 
     R visit(FunctionTree functionTree, T data);
 
+    R visit(CallTree callTree, T data);
+
     R visit(IdentExpressionTree identExpressionTree, T data);
 
     R visit(IfTree ifTree, T data);

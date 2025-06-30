@@ -48,6 +48,12 @@ public interface NoOpVisitor<T> extends Visitor<T, Unit> {
         return Unit.INSTANCE;
     }
 
+
+    @Override
+    default Unit visit(CallTree callTree, T data) {
+        return Unit.INSTANCE;
+    }
+
     @Override
     default Unit visit(IdentExpressionTree identExpressionTree, T data) {
         return Unit.INSTANCE;

@@ -64,6 +64,17 @@ public class RecursiveVisitor<T, R> implements Visitor<T, R> {
     }
 
     @Override
+    public R visit(CallTree callTree, T data) {
+        R r = this.preorderVisitor.visit(callTree, data);
+        r = callTree.functionName().accept(this, accumulate(data, r));
+        for (ExpressionTree expression : callTree.parameters()) {
+            r = expression.accept(this, accumulate(data, r));
+        }
+        r = this.postorderVisitor.visit(callTree, accumulate(data, r));
+        return r;
+    }
+
+    @Override
     public R visit(IdentExpressionTree identExpressionTree, T data) {
         R r = this.preorderVisitor.visit(identExpressionTree, data);
         r = identExpressionTree.name().accept(this, accumulate(data, r));
