@@ -2,7 +2,6 @@ package edu.kit.kastel.vads.compiler.backend.instruction;
 
 import edu.kit.kastel.vads.compiler.backend.register.Register;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
-import edu.kit.kastel.vads.compiler.ir.node.Block;
 
 public abstract sealed class ConditionalJumpInstruction extends Instruction permits
         JumpZeroInstruction, JumpNonZeroInstruction

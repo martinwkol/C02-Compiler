@@ -4,9 +4,6 @@ import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class BreakContinueAnalysis {
     static class Counter {
         public int count = 0;

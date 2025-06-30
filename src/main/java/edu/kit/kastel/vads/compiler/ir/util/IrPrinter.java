@@ -135,7 +135,7 @@ public class IrPrinter {
             case ConstBoolNode cBool            -> constBool(cBool);
             case ConstIntNode cInt              -> constInt(cInt);
 
-            case ReturnNode ret                 -> {}
+            case ReturnNode _                   -> {}
             case JumpNode _, IfNode _           -> {} // handle jumps later
             case Phi phi                        -> newPhi(phi);
             case ProjNode _, StartNode _        -> {}

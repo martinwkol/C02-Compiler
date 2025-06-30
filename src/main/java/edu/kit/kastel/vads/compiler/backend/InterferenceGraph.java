@@ -43,7 +43,7 @@ public class InterferenceGraph {
     private List<VirtualRegister> maxCardinalitySearch() {
         List<VirtualRegister> ordering = new ArrayList<>();
         Map<VirtualRegister, Integer> weight = virtualRegisters.stream()
-                .collect(Collectors.toMap(r -> r, r -> 0));
+                .collect(Collectors.toMap(r -> r, _ -> 0));
         for (PhysicalRegister register : PhysicalRegister.All) {
             Set<Register> neighbourhood = edges.get(register);
             if (neighbourhood == null) continue;

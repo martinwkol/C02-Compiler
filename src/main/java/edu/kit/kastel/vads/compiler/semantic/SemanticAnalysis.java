@@ -4,8 +4,6 @@ import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
 import edu.kit.kastel.vads.compiler.parser.visitor.RecursivePostorderVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.RecursiveVisitor;
 
-import javax.sound.midi.VoiceStatus;
-
 public class SemanticAnalysis {
 
     private final ProgramTree program;

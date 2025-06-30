@@ -2,7 +2,6 @@ package edu.kit.kastel.vads.compiler.backend.instruction;
 
 import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
-import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.register.RegisterMapping;
 
 public abstract sealed class ShiftInstruction extends Instruction permits

@@ -273,7 +273,7 @@ public class AssemblyGenerator {
     }
 
     private boolean moveToStackIfVirtual(Register register) {
-        if (!(register instanceof VirtualRegister virtualRegister)) return false;
+        if (!(register instanceof VirtualRegister)) return false;
         if (register != storedInTemp) throw new IllegalStateException("attempted to store temp in wrong register");
         move(PhysicalRegister.Temp, register);
         storedInTemp = null;

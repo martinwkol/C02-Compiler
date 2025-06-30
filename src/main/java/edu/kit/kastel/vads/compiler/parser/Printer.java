@@ -1,6 +1,5 @@
 package edu.kit.kastel.vads.compiler.parser;
 
-import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
 
@@ -116,7 +115,7 @@ public class Printer {
                 print("break");
                 semicolon();
             }
-            case ContinueTree(Span span) -> {
+            case ContinueTree(_) -> {
                 print("continue");
                 semicolon();
             }

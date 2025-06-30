@@ -1,16 +1,11 @@
 package edu.kit.kastel.vads.compiler.backend.instruction;
 
 import edu.kit.kastel.vads.compiler.backend.InterferenceGraph;
-import edu.kit.kastel.vads.compiler.backend.register.PhysicalRegister;
 import edu.kit.kastel.vads.compiler.backend.register.Register;
-import edu.kit.kastel.vads.compiler.backend.register.RegisterAllocator;
-import edu.kit.kastel.vads.compiler.ir.node.*;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Set;
-
-import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
 public abstract sealed class Instruction permits
         BinaryOperationInstruction, UnaryOperationInstruction,
