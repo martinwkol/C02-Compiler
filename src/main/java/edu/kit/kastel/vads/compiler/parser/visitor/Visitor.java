@@ -49,5 +49,7 @@ public interface Visitor<T, R> {
 
     R visit(ReturnTree returnTree, T data);
 
+    R visit(ParameterTree parameterTree, T data);
+
     R visit(TypeTree typeTree, T data);
 }

@@ -179,6 +179,14 @@ public class RecursiveVisitor<T, R> implements Visitor<T, R> {
     }
 
     @Override
+    public R visit(ParameterTree parameterTree, T data) {
+        R r = this.preorderVisitor.visit(parameterTree, data);
+        r = parameterTree.type().accept(this, accumulate(data, r));
+        r = parameterTree.name().accept(this, accumulate(data, r));
+        return this.postorderVisitor.visit(parameterTree, accumulate(data, r));
+    }
+
+    @Override
     public R visit(TypeTree typeTree, T data) {
         R r = this.preorderVisitor.visit(typeTree, data);
         return this.postorderVisitor.visit(typeTree, accumulate(data, r));
