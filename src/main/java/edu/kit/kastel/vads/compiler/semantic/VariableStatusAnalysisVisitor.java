@@ -59,7 +59,19 @@ class VariableStatusAnalysisVisitor implements Visitor<VariableStatus, VariableS
 
     @Override
     public VariableStatus visit(FunctionTree functionTree, VariableStatus data) {
-        functionTree.body().accept(this, VariableStatus.clonedFrom(data));
+        VariableStatus cloned = VariableStatus.clonedFrom(data);
+        for (ParameterTree parameter : functionTree.parameters()) {
+            cloned = parameter.accept(this, cloned);
+        }
+        functionTree.body().accept(this, cloned);
+        return data;
+    }
+
+    @Override
+    public VariableStatus visit(CallTree callTree, VariableStatus data) {
+        for (ExpressionTree parameter : callTree.parameters()) {
+            data = parameter.accept(this, data);
+        }
         return data;
     }
 
@@ -163,6 +175,13 @@ class VariableStatusAnalysisVisitor implements Visitor<VariableStatus, VariableS
     @Override
     public VariableStatus visit(ReturnTree returnTree, VariableStatus data) {
         data = returnTree.expression().accept(this, data);
+        return data;
+    }
+
+    @Override
+    public VariableStatus visit(ParameterTree parameterTree, VariableStatus data) {
+        checkUndeclared(parameterTree.name(), data);
+        data.declared.add(parameterTree.name().name());
         return data;
     }
 
