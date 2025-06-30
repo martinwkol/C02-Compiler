@@ -252,23 +252,27 @@ class GraphConstructor {
     }
 
     private Node readSideEffect(Block block) {
+        return readSideEffect(block, currentBlock());
+    }
+
+    private Node readSideEffect(Block block, Block origin) {
         Node node = this.currentSideEffect.get(block);
         if (node != null) {
             return node;
         }
-        return readSideEffectRecursive(block);
+        return readSideEffectRecursive(block, origin);
     }
 
-    private Node readSideEffectRecursive(Block block) {
+    private Node readSideEffectRecursive(Block block, Block origin) {
         Node val;
         if (!this.sealedBlocks.contains(block)) {
-            val = newPhi(currentBlock());
+            val = newPhi(origin);
             Phi old = this.incompleteSideEffectPhis.put(block, (Phi) val);
             assert old == null : "double readSideEffectRecursive for " + block;
         } else if (block.predecessors().size() == 1) {
-            val = readSideEffect(block.predecessors().getFirst().block());
+            val = readSideEffect(block.predecessors().getFirst().block(), origin);
         } else {
-            val = newPhi(currentBlock());
+            val = newPhi(origin);
             writeSideEffect(block, val);
             val = addPhiOperands((Phi) val, block);
         }
@@ -278,7 +282,7 @@ class GraphConstructor {
 
     Node addPhiOperands(Phi phi, Block block) {
         for (Node pred : block.predecessors()) {
-            phi.appendOperand(readSideEffect(pred.block()));
+            phi.appendOperand(readSideEffect(pred.block(), pred.block()));
         }
         return tryRemoveTrivialPhi(phi);
     }
