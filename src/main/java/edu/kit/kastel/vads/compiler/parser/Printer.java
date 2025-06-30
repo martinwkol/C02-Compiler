@@ -40,11 +40,16 @@ public class Printer {
                 this.indentDepth--;
                 print("}");
             }
-            case FunctionTree(var returnType, var name, var body) -> {
+            case FunctionTree(var returnType, var name, var parameters, var body) -> {
                 printTree(returnType);
                 space();
                 printTree(name);
-                print("()");
+                print("( ");
+                for (ParameterTree parameter : parameters) {
+                    printTree(parameter);
+                    print(", ");
+                }
+                print(" )");
                 space();
                 printTree(body);
             }
@@ -56,6 +61,15 @@ public class Printer {
                 }
             }
             case TypeTree(var type, _) -> print(type.asString());
+            case CallTree(var name, var parameters, _) -> {
+                printTree(name);
+                print("( ");
+                for (ExpressionTree expression : parameters) {
+                    printTree(expression);
+                    print(", ");
+                }
+                print(" )");
+            }
             case BinaryOperationTree(var lhs, var rhs, var op) -> binaryOperation(lhs, rhs, op);
             case IntLiteralTree(var value, _, _) -> this.builder.append(value);
             case BoolLiteralTree(boolean value, _) -> this.builder.append(value);
@@ -72,6 +86,11 @@ public class Printer {
                 space();
                 printTree(expression);
                 semicolon();
+            }
+            case ParameterTree(var type, var name) -> {
+                printTree(type);
+                space();
+                printTree(name);
             }
             case DeclarationTree(var type, var name, var initializer) -> {
                 printTree(type);
