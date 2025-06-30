@@ -1,27 +1,22 @@
 package edu.kit.kastel.vads.compiler.semantic;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.type.BasicType;
+import edu.kit.kastel.vads.compiler.parser.type.FunctionType;
 import edu.kit.kastel.vads.compiler.parser.type.Type;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
 
-import java.util.HashMap;
-import java.util.Map;
-
 ///  Checks type correctness
 public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
-
     public static class TypeMapping {
-        private final Map<ExpressionTree, Type> expressionTypeMap;
-        private final Map<Name, Type> nameTypeMap;
-
-        public TypeMapping() {
-            expressionTypeMap = new HashMap<>();
-            nameTypeMap = new HashMap<>();
-        }
+        private final Map<ExpressionTree, Type> expressionTypeMap = new HashMap<>();
+        private final Map<Name, Type> nameTypeMap = new HashMap<>();
 
         public Type get(ExpressionTree expression) {
             return expressionTypeMap.get(expression);
@@ -31,6 +26,10 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
             expressionTypeMap.put(expression, type);
         }
 
+        public boolean contains(Name name) {
+            return nameTypeMap.containsKey(name);
+        }
+
         public Type get(Name name) {
             return nameTypeMap.get(name);
         }
@@ -38,6 +37,34 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
         public void put(Name name, Type type) {
             nameTypeMap.put(name, type);
         }
+    }
+
+    private final Namespace<FunctionType> functionTypeNamespace;
+
+    public TypeAnalysis(Namespace<FunctionType> functionTypeNamespace) {
+        this.functionTypeNamespace = functionTypeNamespace;
+    }
+
+    @Override
+    public Unit visit(CallTree callTree, TypeMapping data) {
+        FunctionType functionType = functionTypeNamespace.get(callTree.functionName().name());
+        for (int i = 0; i < callTree.parameters().size(); i++) {
+            if (!data.get(callTree.parameters().get(i)).equals(functionType.parameterTypes().get(i))) {
+                throw new SemanticException(String.format("expected type '%s' but got expression of type %s", 
+                    functionType.parameterTypes().get(i), data.get(callTree.parameters().get(i)))
+                );
+            }
+        }
+        data.put(callTree, functionType.returnType());
+        return NoOpVisitor.super.visit(callTree, data);   
+    }
+
+    @Override
+    public Unit visit(ParameterTree parameterTree, TypeMapping data) {
+        Name name = parameterTree.name().name();
+        Type type = parameterTree.type().type();
+        data.put(name, type);
+        return NoOpVisitor.super.visit(parameterTree, data); 
     }
 
     @Override
@@ -77,7 +104,9 @@ public class TypeAnalysis implements NoOpVisitor<TypeAnalysis.TypeMapping> {
 
     @Override
     public Unit visit(IdentExpressionTree identExpressionTree, TypeMapping data) {
-        data.put(identExpressionTree, data.get(identExpressionTree.name().name()));
+        if (data.contains(identExpressionTree.name().name())) {
+            data.put(identExpressionTree, data.get(identExpressionTree.name().name()));
+        }
         return NoOpVisitor.super.visit(identExpressionTree, data);
     }
 
