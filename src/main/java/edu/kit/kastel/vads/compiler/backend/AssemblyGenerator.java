@@ -24,8 +24,14 @@ public class AssemblyGenerator {
         this.registerMapping = registerMapping;
         this.storedInTemp = null;
         this.maxStackUsage = maxStackUsage;
-        if (maxStackUsage > 0)
+        if (instructionSet.name() == "main") {
+            builder.append(".main:\n");
+        } else {
+            builder.append(String.format("s:\n", instructionSet.name()));
+        }
+        if (maxStackUsage > 0) {
             builder.append(String.format("subq $%d, %%rsp\n", maxStackUsage));
+        }
         for (Block block : instructionSet.getBlocks()) {
             addLabel(block);
             for (Instruction instruction : instructionSet.getInstructions(block)) {
@@ -47,8 +53,7 @@ public class AssemblyGenerator {
                 "call .main\n" +
                 "movq %rax, %rdi\n" +
                 "movq $0x3C, %rax\n" +
-                "syscall\n" +
-                ".main:\n");
+                "syscall\n");
     }
 
     private void addLabel(Block block) {
