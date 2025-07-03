@@ -86,7 +86,7 @@ public class Main {
 
             InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
             RegisterMapping registerMapping = interferenceGraph.computeRegisterMapping();
-            assemblyGenerator.addFunction(ib, registerMapping, registerMapping.computeMaxStackUsage());
+            assemblyGenerator.addFunction(ib, registerMapping, registerMapping.computeMaxStackVariables());
         }
         return assemblyGenerator.getAssembly();
     }

@@ -38,12 +38,12 @@ public class RegisterMapping {
         return mapping.get(register);
     }
 
-    public int computeMaxStackUsage() {
+    public int computeMaxStackVariables() {
         int maxVRId = mapping.values().stream()
                 .filter(r -> r instanceof VirtualRegister)
                 .map(register -> ((VirtualRegister) register).id())
                 .max(Comparator.comparingInt(i -> i))
                 .orElse(-1);
-        return (maxVRId + 1) * 8;
+        return (maxVRId + 1);
     }
 }

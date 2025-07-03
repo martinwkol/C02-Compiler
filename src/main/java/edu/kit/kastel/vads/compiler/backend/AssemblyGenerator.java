@@ -13,24 +13,24 @@ public class AssemblyGenerator {
     private FunctionInstructionSet instructionSet;
     private RegisterMapping registerMapping;
     private @Nullable VirtualRegister storedInTemp;
-    private int maxStackUsage;
+    private int maxStackVariables;
 
     public AssemblyGenerator() {
         addStarterCode();
     }
 
-    public void addFunction(FunctionInstructionSet instructionSet, RegisterMapping registerMapping, int maxStackUsage) {
+    public void addFunction(FunctionInstructionSet instructionSet, RegisterMapping registerMapping, int maxStackVariables) {
         this.instructionSet = instructionSet;
         this.registerMapping = registerMapping;
         this.storedInTemp = null;
-        this.maxStackUsage = maxStackUsage;
+        this.maxStackVariables = maxStackVariables;
         if (instructionSet.name() == "main") {
             builder.append(".main:\n");
         } else {
             builder.append(String.format("s:\n", instructionSet.name()));
         }
-        if (maxStackUsage > 0) {
-            builder.append(String.format("subq $%d, %%rsp\n", maxStackUsage));
+        if (maxStackVariables > 0) {
+            builder.append(String.format("subq $%d, %%rsp\n", maxStackVariables * 8));
         }
         for (Block block : instructionSet.getBlocks()) {
             addLabel(block);
@@ -249,8 +249,9 @@ public class AssemblyGenerator {
     private void addReturnInstruction(ReturnInstruction returnInstruction) {
         Register returnRegister = returnInstruction.getReturnRegister(registerMapping);
         if (returnRegister != PhysicalRegister.Return) move(returnRegister, PhysicalRegister.Return);
-        if (maxStackUsage > 0)
-            builder.append(String.format("addq $%d, %%rsp\n", maxStackUsage));
+        if (maxStackVariables > 0) {
+            builder.append(String.format("addq $%d, %%rsp\n", maxStackVariables * 8));
+        }
         builder.append("ret\n");
     }
 
