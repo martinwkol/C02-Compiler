@@ -5,6 +5,7 @@ import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.node.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class IrPrinter {
     private final List<Block> blocks = new ArrayList<>();
@@ -109,6 +110,8 @@ public class IrPrinter {
         switch (node) {
             case Block block                    -> visitExitNode(block, visited);
 
+            case FParameterNode param           -> param(param);
+
             case AssignNode assign              -> unary(assign, "");
             case AddNode add                    -> binary(add, "add");
             case SubNode sub                    -> binary(sub, "sub");
@@ -132,6 +135,8 @@ public class IrPrinter {
             case CBiggerEqNode biggerEq         -> binary(biggerEq, "geq");
             case LogNegationNode logNegation    -> unary(logNegation, "!");
 
+            case CallNode call                  -> call(call);
+
             case ConstBoolNode cBool            -> constBool(cBool);
             case ConstIntNode cInt              -> constInt(cInt);
 
@@ -147,6 +152,13 @@ public class IrPrinter {
 
     private void visitExitNode(Block block, Set<Node> visited) {
         if (block.exitNode() != null) scanInstructionsRecursive(block.exitNode(), visited);
+    }
+
+    private void param(FParameterNode parameterNode) {
+        builder.get(parameterNode.block()).append(String.format(
+            "param %s",
+            registerAllocator.get(parameterNode)
+        ));
     }
 
     private void binary(BinaryOperationNode node, String opName) {
@@ -165,6 +177,17 @@ public class IrPrinter {
                 registerAllocator.get(node),
                 opName,
                 registerAllocator.get(node.node())
+        ));
+    }
+
+    private void call(CallNode callNode) {
+        builder.get(callNode.block()).append(String.format(
+            "%s = %s(%s)",
+            registerAllocator.get(callNode),
+            callNode.functionName(),
+            callNode.parameters().stream()
+                .map(node -> registerAllocator.get(node).toString())
+                .collect(Collectors.joining(", "))
         ));
     }
 
