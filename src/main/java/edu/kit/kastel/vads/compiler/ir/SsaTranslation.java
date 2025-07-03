@@ -12,7 +12,9 @@ import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 import edu.kit.kastel.vads.compiler.util.Union;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BinaryOperator;
 
@@ -161,6 +163,19 @@ public class SsaTranslation {
             };
             popSpan();
             return Optional.of(res);
+        }
+
+        @Override
+        public Optional<Node> visit(CallTree callTree, SsaTranslation data) {
+            pushSpan(callTree);
+            List<Node> parameters = new ArrayList<>(callTree.parameters().size());
+            for (ExpressionTree parameter : callTree.parameters()) {
+                parameters.add(parameter.accept(this, data).orElseThrow());
+            }
+            String functionName = callTree.functionName().name().name().asString();
+            Node ret = projResultCall(data, data.constructor.newCall(functionName, parameters));
+            popSpan();
+            return Optional.of(ret);
         }
 
         @Override
@@ -350,6 +365,11 @@ public class SsaTranslation {
             pushSpan(functionTree);
             Node start = data.constructor.newStart();
             data.constructor.writeCurrentSideEffect(data.constructor.newSideEffectProj(start));
+            for (int i = 0; i < functionTree.parameters().size(); i++) {
+                ParameterTree parameter = functionTree.parameters().get(i);
+                FParameterNode node = new FParameterNode(data.currentBlock(), i);
+                data.writeVariable(parameter.name().name(), data.currentBlock(), node);
+            }
             functionTree.body().accept(this, data);
             popSpan();
             return NOT_AN_EXPRESSION;
@@ -391,6 +411,11 @@ public class SsaTranslation {
 
         @Override
         public Optional<Node> visit(ProgramTree programTree, SsaTranslation data) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<Node> visit(ParameterTree parameterTree, SsaTranslation data) {
             throw new UnsupportedOperationException();
         }
 
@@ -464,6 +489,13 @@ public class SsaTranslation {
             Node projSideEffect = data.constructor.newSideEffectProj(divMod);
             data.constructor.writeCurrentSideEffect(projSideEffect);
             return data.constructor.newResultProj(divMod);
+        }
+
+        private Node projResultCall(SsaTranslation data, Node call) {
+            if (!(call instanceof CallNode)) return call;
+            Node projSideEffect = data.constructor.newSideEffectProj(call);
+            data.constructor.writeCurrentSideEffect(projSideEffect);
+            return data.constructor.newResultProj(projSideEffect);
         }
     }
 

@@ -6,6 +6,7 @@ import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -106,6 +107,10 @@ class GraphConstructor {
 
     public Node newLogNegation(Node node) {
         return this.optimizer.transform(new LogNegationNode(currentBlock(), node));
+    }
+
+    public Node newCall(String functionName, List<Node> parameters) {
+        return this.optimizer.transform(new CallNode(currentBlock(), functionName, parameters, readCurrentSideEffect()));
     }
 
     public Node newConstInt(int value) {
