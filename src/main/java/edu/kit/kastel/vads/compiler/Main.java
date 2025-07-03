@@ -78,14 +78,16 @@ public class Main {
     }
 
     private static String generateAssembly(List<IrGraph> graphs) {
-        VirtualRegisterAllocator virtualRA = new VirtualRegisterAllocator();
-        FunctionInstructionSet ib = new FunctionInstructionSet(graphs.getFirst(), virtualRA);
-        ib.deduceLiveness();
+        AssemblyGenerator assemblyGenerator = new AssemblyGenerator();
+        for (IrGraph function : graphs) {
+            VirtualRegisterAllocator virtualRA = new VirtualRegisterAllocator();
+            FunctionInstructionSet ib = new FunctionInstructionSet(function, virtualRA);
+            ib.deduceLiveness();
 
-        InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
-        RegisterMapping registerMapping = interferenceGraph.computeRegisterMapping();
-        AssemblyGenerator assemblyGenerator = new AssemblyGenerator(ib, registerMapping, registerMapping.computeMaxStackUsage());
-
+            InterferenceGraph interferenceGraph = ib.buildInterferenceGraph();
+            RegisterMapping registerMapping = interferenceGraph.computeRegisterMapping();
+            assemblyGenerator.addFunction(ib, registerMapping, registerMapping.computeMaxStackUsage());
+        }
         return assemblyGenerator.getAssembly();
     }
 

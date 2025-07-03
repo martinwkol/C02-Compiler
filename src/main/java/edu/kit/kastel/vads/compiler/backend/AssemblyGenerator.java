@@ -7,19 +7,23 @@ import org.jspecify.annotations.Nullable;
 
 public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();
-    private final FunctionInstructionSet instructionSet;
-    private final RegisterMapping registerMapping;
-    private @Nullable VirtualRegister storedInTemp;
-    private final int maxStackUsage;
-    private int comparisonLabelCounter;
+    private int comparisonLabelCounter = 0;
 
-    public AssemblyGenerator(FunctionInstructionSet instructionSet, RegisterMapping registerMapping, int maxStackUsage) {
+    // Temps for current function
+    private FunctionInstructionSet instructionSet;
+    private RegisterMapping registerMapping;
+    private @Nullable VirtualRegister storedInTemp;
+    private int maxStackUsage;
+
+    public AssemblyGenerator() {
+        addStarterCode();
+    }
+
+    public void addFunction(FunctionInstructionSet instructionSet, RegisterMapping registerMapping, int maxStackUsage) {
         this.instructionSet = instructionSet;
         this.registerMapping = registerMapping;
+        this.storedInTemp = null;
         this.maxStackUsage = maxStackUsage;
-        this.comparisonLabelCounter = 0;
-        storedInTemp = null;
-        addStarterCode();
         if (maxStackUsage > 0)
             builder.append(String.format("subq $%d, %%rsp\n", maxStackUsage));
         for (Block block : instructionSet.getBlocks()) {
@@ -56,40 +60,40 @@ public class AssemblyGenerator {
 
     private void generateForInstruction(Instruction instruction) {
         switch (instruction) {
-            case MoveInstruction moveInstruction -> addMove(moveInstruction);
+            case MoveInstruction moveInstruction        -> addMove(moveInstruction);
 
-            case AddInstruction add -> addBinary(add, "addl", true);
-            case SubInstruction sub -> addBinary(sub, "subl", false);
-            case MulInstruction mul -> addBinary(mul, "imull", true);
-            case CtldInstruction _ -> addCtld();
-            case DivModInstruction dm -> addDivMod(dm);
+            case AddInstruction add                     -> addBinary(add, "addl", true);
+            case SubInstruction sub                     -> addBinary(sub, "subl", false);
+            case MulInstruction mul                     -> addBinary(mul, "imull", true);
+            case CtldInstruction _                      -> addCtld();
+            case DivModInstruction dm                   -> addDivMod(dm);
 
-            case BitAndInstruction bitAnd -> addBinary(bitAnd,"and", true);
-            case BitOrInstruction bitOr -> addBinary(bitOr,"or", true);
-            case BitXorInstruction bitXor -> addBinary(bitXor,"xor", true);
-            case BitNegationInstruction bitNegation -> addBitNegation(bitNegation);
+            case BitAndInstruction bitAnd               -> addBinary(bitAnd,"and", true);
+            case BitOrInstruction bitOr                 -> addBinary(bitOr,"or", true);
+            case BitXorInstruction bitXor               -> addBinary(bitXor,"xor", true);
+            case BitNegationInstruction bitNegation     -> addBitNegation(bitNegation);
 
-            case ShiftLeftInstruction shiftLeft -> addShift(shiftLeft, "sal");
-            case ShiftRightInstruction shiftRight -> addShift(shiftRight, "sar");
+            case ShiftLeftInstruction shiftLeft         -> addShift(shiftLeft, "sal");
+            case ShiftRightInstruction shiftRight       -> addShift(shiftRight, "sar");
 
-            case EqualsInstruction equals -> addComparison(equals, "je");
-            case UnequalsInstruction unequals -> addComparison(unequals, "jne");
-            case SmallerInstruction smaller -> addComparison(smaller, "jl");
-            case SmallerEqInstruction smallerEq -> addComparison(smallerEq, "jle");
-            case BiggerInstruction bigger -> addComparison(bigger, "jg");
-            case BiggerEqInstruction biggerEq -> addComparison(biggerEq, "jge");
-            case LogNegationInstruction logNegation -> addLogNegation(logNegation);
+            case EqualsInstruction equals               -> addComparison(equals, "je");
+            case UnequalsInstruction unequals           -> addComparison(unequals, "jne");
+            case SmallerInstruction smaller             -> addComparison(smaller, "jl");
+            case SmallerEqInstruction smallerEq         -> addComparison(smallerEq, "jle");
+            case BiggerInstruction bigger               -> addComparison(bigger, "jg");
+            case BiggerEqInstruction biggerEq           -> addComparison(biggerEq, "jge");
+            case LogNegationInstruction logNegation     -> addLogNegation(logNegation);
 
-            case ConstIntInstruction constInt -> addConstInt(constInt);
-            case ConstBoolInstruction constBool -> addConstBool(constBool);
+            case ConstIntInstruction constInt           -> addConstInt(constInt);
+            case ConstBoolInstruction constBool         -> addConstBool(constBool);
 
-            case JumpInstruction jump -> addJump(jump);
-            case JumpZeroInstruction jumpZero -> addJumpZero(jumpZero);
-            case JumpNonZeroInstruction jumpNonZero -> addJumpNonZero(jumpNonZero);
+            case JumpInstruction jump                   -> addJump(jump);
+            case JumpZeroInstruction jumpZero           -> addJumpZero(jumpZero);
+            case JumpNonZeroInstruction jumpNonZero     -> addJumpNonZero(jumpNonZero);
 
 
-            case ReturnInstruction ret -> addReturnInstruction(ret);
-            case LabelInstruction _ -> {}
+            case ReturnInstruction ret                  -> addReturnInstruction(ret);
+            case LabelInstruction _                     -> {}
         }
     }
 
