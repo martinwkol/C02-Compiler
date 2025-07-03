@@ -238,7 +238,7 @@ public class FunctionInstructionSet {
     private void newBlock(Block block, Set<Node> visited) {
         blocks.add(block);
         instructions.put(block, new ArrayList<>());
-        instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
+        instructions.get(block).add(new LabelInstruction(".block" + blocks.size()));
         // maybe unnecessary
         if (block.exitNode() != null) scanBlocksRecursive(block.exitNode(), visited);
     }

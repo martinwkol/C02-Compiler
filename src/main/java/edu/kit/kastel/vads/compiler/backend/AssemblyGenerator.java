@@ -37,14 +37,14 @@ public class AssemblyGenerator {
 
     private void addStarterCode() {
         builder.append(".global main\n" +
-                ".global _main\n" +
+                ".global .main\n" +
                 ".text\n" +
                 "main:\n" +
-                "call _main\n" +
+                "call .main\n" +
                 "movq %rax, %rdi\n" +
                 "movq $0x3C, %rax\n" +
                 "syscall\n" +
-                "_main:\n");
+                ".main:\n");
     }
 
     private void addLabel(Block block) {
@@ -145,8 +145,8 @@ public class AssemblyGenerator {
             // cmp first second computes second - first => first = right, second = left
             builder.append(String.format("cmp %s, %s\n", right.registerName(), left.registerName()));
         }
-        String labelTrue = String.format("C%dT", comparisonLabelCounter);
-        String labelEnd = String.format("C%dE", comparisonLabelCounter);
+        String labelTrue = String.format(".C%dT", comparisonLabelCounter);
+        String labelEnd = String.format(".C%dE", comparisonLabelCounter);
         comparisonLabelCounter++;
 
         builder.append(String.format("%s %s\n", jumpInstruction, labelTrue));
