@@ -10,11 +10,12 @@ import java.util.Set;
 public abstract sealed class Instruction permits
         BinaryOperationInstruction, UnaryOperationInstruction,
         ShiftInstruction,
+        CallInstruction,
         ConstIntInstruction, ConstBoolInstruction,
         CtldInstruction, DivModInstruction,
         MoveInstruction,
         ReturnInstruction, JumpInstruction, ConditionalJumpInstruction,
-        LabelInstruction
+        LabelInstruction, ParameterInstruction
 {
     protected final Set<Register> live = new HashSet<>();
     protected final Set<Register> defines = new HashSet<>();

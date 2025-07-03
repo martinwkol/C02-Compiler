@@ -136,6 +136,8 @@ public class InstructionSet {
         switch (node) {
             case Block block                    -> visitExitNode(block, visited);
 
+            case FParameterNode param           -> newParam(param);
+
             case AssignNode assign              -> newAssign(assign);
             case AddNode add                    -> newAdd(add);
             case SubNode sub                    -> newSub(sub);
@@ -158,6 +160,8 @@ public class InstructionSet {
             case CBiggerNode bigger             -> newBigger(bigger);
             case CBiggerEqNode biggerEq         -> newBiggerEq(biggerEq);
             case LogNegationNode logNegation    -> newLogNegation(logNegation);
+
+            case CallNode call                  -> newCall(call);
 
             case ConstBoolNode constBool        -> newConstBool(constBool);
             case ConstIntNode constInt          -> newConstInt(constInt);
@@ -231,6 +235,12 @@ public class InstructionSet {
         instructions.get(block).add(new LabelInstruction("block" + blocks.size()));
         // maybe unnecessary
         if (block.exitNode() != null) scanBlocksRecursive(block.exitNode(), visited);
+    }
+
+    private void newParam(FParameterNode parameterNode) {
+        instructions.get(parameterNode.block()).add(new ParameterInstruction(
+                registerAllocator.get(parameterNode)
+        ));
     }
 
     private void newAssign(AssignNode assign) {
@@ -320,6 +330,13 @@ public class InstructionSet {
 
     private void newReturn(ReturnNode ret) {
         instructions.get(ret.block()).add(new ReturnInstruction(ret, registerAllocator));
+    }
+
+    private void newCall(CallNode callNode) {
+        instructions.get(callNode.block()).add(new CallInstruction(
+            callNode.functionName(),
+            callNode.parameters().stream().map(node -> (Register) registerAllocator.get(node)).toList()
+        ));
     }
 
     private void newConstBool(ConstBoolNode constBool) {
