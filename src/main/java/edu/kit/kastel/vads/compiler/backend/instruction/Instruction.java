@@ -27,6 +27,10 @@ public abstract sealed class Instruction permits
         this.hasImmediateSuccessor = hasImmediateSuccessor;
     }
 
+    public boolean isLive(Register register) {
+        return live.contains(register);
+    }
+
     protected void addDefines(@Nullable Register register) {
         if (register == null) throw new IllegalArgumentException("Attempted to define null register");
         defines.add(register);
