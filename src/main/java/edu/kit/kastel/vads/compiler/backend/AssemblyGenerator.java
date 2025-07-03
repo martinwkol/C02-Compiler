@@ -66,6 +66,7 @@ public class AssemblyGenerator {
     private void generateForInstruction(Instruction instruction) {
         switch (instruction) {
             case MoveInstruction moveInstruction        -> addMove(moveInstruction);
+            case ParameterInstruction parameter         -> addParameter(parameter);
 
             case AddInstruction add                     -> addBinary(add, "addl", true);
             case SubInstruction sub                     -> addBinary(sub, "subl", false);
@@ -106,6 +107,17 @@ public class AssemblyGenerator {
         Register destination = moveInstruction.getDestination(registerMapping);
         Register source = moveInstruction.getSource(registerMapping);
         if (source instanceof VirtualRegister && destination instanceof VirtualRegister) {
+            move(source, PhysicalRegister.Temp);
+            move(PhysicalRegister.Temp, destination);
+        } else {
+            move(source, destination);
+        }
+    }
+
+    private void addParameter(ParameterInstruction parameter) {
+        Register destination = parameter.getDestination(registerMapping);
+        Register source = new VirtualRegister(this.maxStackVariables + 1 + parameter.index()); // + 1 for return address
+        if (destination instanceof VirtualRegister) {
             move(source, PhysicalRegister.Temp);
             move(PhysicalRegister.Temp, destination);
         } else {

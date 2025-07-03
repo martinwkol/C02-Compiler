@@ -245,7 +245,8 @@ public class FunctionInstructionSet {
 
     private void newParam(FParameterNode parameterNode) {
         instructions.get(parameterNode.block()).add(new ParameterInstruction(
-                registerAllocator.get(parameterNode)
+                registerAllocator.get(parameterNode),
+                parameterNode.index()
         ));
     }
 
