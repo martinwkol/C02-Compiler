@@ -9,9 +9,9 @@ import java.util.List;
 
 /// The base class for all nodes.
 public sealed abstract class Node permits
-        BinaryOperationNode, UnaryOperationNode, ExitNode,
+        BinaryOperationNode, UnaryOperationNode, CallNode, ExitNode,
         Block, ConstIntNode, ConstBoolNode, Phi, ProjNode, StartNode,
-        InvalidNode
+        FParameterNode, InvalidNode
 {
     private final IrGraph graph;
     private final Block block;
@@ -22,6 +22,16 @@ public sealed abstract class Node permits
         this.graph = block.graph();
         this.block = block;
         this.predecessors.addAll(List.of(predecessors));
+        for (Node predecessor : predecessors) {
+            graph.registerSuccessor(predecessor, this);
+        }
+        this.debugInfo = DebugInfoHelper.getDebugInfo();
+    }
+
+    protected Node(Block block, List<Node> predecessors) {
+        this.graph = block.graph();
+        this.block = block;
+        this.predecessors.addAll(predecessors);
         for (Node predecessor : predecessors) {
             graph.registerSuccessor(predecessor, this);
         }
