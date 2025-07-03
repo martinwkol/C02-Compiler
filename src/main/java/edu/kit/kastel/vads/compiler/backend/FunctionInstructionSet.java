@@ -12,18 +12,24 @@ import java.util.*;
 
 import static edu.kit.kastel.vads.compiler.ir.util.NodeSupport.predecessorSkipProj;
 
-public class InstructionSet {
+public class FunctionInstructionSet {
+    private final String name;
     private final List<Block> blocks = new ArrayList<>();
     private final Map<Block, List<Instruction>> instructions = new HashMap<>();
     private final VirtualRegisterAllocator registerAllocator;
 
-    public InstructionSet(IrGraph graph, VirtualRegisterAllocator registerAllocator) {
+    public FunctionInstructionSet(IrGraph graph, VirtualRegisterAllocator registerAllocator) {
+        this.name = graph.name();
         this.registerAllocator = registerAllocator;
         allocateRegisters(graph.endBlock());
         scanBlocks(graph.endBlock());
         scanInstructions(graph.endBlock());
         handlePhis(graph.endBlock());
         handleJumps();
+    }
+
+    public String name() {
+        return name;
     }
 
     public Block getBlock(int idx) {

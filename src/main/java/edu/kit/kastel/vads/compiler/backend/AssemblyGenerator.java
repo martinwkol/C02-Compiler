@@ -7,13 +7,13 @@ import org.jspecify.annotations.Nullable;
 
 public class AssemblyGenerator {
     private final StringBuilder builder = new StringBuilder();
-    private final InstructionSet instructionSet;
+    private final FunctionInstructionSet instructionSet;
     private final RegisterMapping registerMapping;
     private @Nullable VirtualRegister storedInTemp;
     private final int maxStackUsage;
     private int comparisonLabelCounter;
 
-    public AssemblyGenerator(InstructionSet instructionSet, RegisterMapping registerMapping, int maxStackUsage) {
+    public AssemblyGenerator(FunctionInstructionSet instructionSet, RegisterMapping registerMapping, int maxStackUsage) {
         this.instructionSet = instructionSet;
         this.registerMapping = registerMapping;
         this.maxStackUsage = maxStackUsage;
