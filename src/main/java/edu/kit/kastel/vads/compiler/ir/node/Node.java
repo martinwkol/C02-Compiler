@@ -28,16 +28,6 @@ public sealed abstract class Node permits
         this.debugInfo = DebugInfoHelper.getDebugInfo();
     }
 
-    protected Node(Block block, List<Node> predecessors) {
-        this.graph = block.graph();
-        this.block = block;
-        this.predecessors.addAll(predecessors);
-        for (Node predecessor : predecessors) {
-            graph.registerSuccessor(predecessor, this);
-        }
-        this.debugInfo = DebugInfoHelper.getDebugInfo();
-    }
-
     protected Node(IrGraph graph) {
         assert this.getClass() == Block.class : "must be used by Block only";
         this.graph = graph;
