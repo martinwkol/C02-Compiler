@@ -110,7 +110,7 @@ class GraphConstructor {
     }
 
     public Node newCall(String functionName, List<Node> parameters) {
-        return this.optimizer.transform(new CallNode(currentBlock(), functionName, parameters, readCurrentSideEffect()));
+        return this.optimizer.transform(new CallNode(currentBlock(), functionName, readCurrentSideEffect(), parameters));
     }
 
     public Node newConstInt(int value) {
